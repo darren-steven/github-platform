@@ -1,5 +1,7 @@
 Here is a tour of what you will see in **`https://dev.azure.com/tofutest`**, mapped to the **Tier 1 (Locked Baselines)** and **Tier 2/3 (YAML Dials)** that created them:
 
+It has been verified against a Live AzDo orgainsation, executed locally from a workstation with an az cli login (no PAT required)
+
 ---
 
 ### 1. Organization-Level Settings (`https://dev.azure.com/tofutest/_settings/`)

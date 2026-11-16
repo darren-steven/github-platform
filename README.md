@@ -26,6 +26,7 @@ Organization-wide settings live in [`config/org.yaml`](./config/org.yaml); share
 | Change organization-wide settings or groups | [`config/org.yaml`](./config/org.yaml), [`config/groups.yaml`](./config/groups.yaml) |
 | Check allowed settings and security limits | [Dials and baselines catalog](./docs/dials-catalog.md) |
 | Understand the repo layout and pull request workflow | [Contributor and maintainer guide](./docs/onboarding-guide.md) |
+| Set up OpenTofu access and PIM elevation | [OpenTofu access and Azure PIM](./docs/permissions-and-pim.md) |
 | Change how the infrastructure engine works | [Platform engineering reference](./ARCHITECTURE.md) |
 
 ## Repository map

@@ -1,6 +1,5 @@
 {
   "name": "azdo-iac",
-
   "features": {
     "ghcr.io/devcontainers/features/terraform:1": {
       "version": "1.13.3"
@@ -11,9 +10,8 @@
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,
       "configureZshAsDefaultShell": true
-    }
   },
-
+  "postCreateCommand": "bash .devcontainer/install-conftest.sh",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -25,30 +23,23 @@
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-azuretools.vscode-bicep",
-        "yzhang.markdown-all-in-one"
-],
-
+      ],
       "settings": {
         "editor.formatOnSave": true,
         "files.trimTrailingWhitespace": true,
         "files.insertFinalNewline": true,
-
         "[terraform]": {
           "editor.defaultFormatter": "hashicorp.terraform"
         },
-
         "[terraform-vars]": {
           "editor.defaultFormatter": "hashicorp.terraform"
         },
-
         "[yaml]": {
           "editor.defaultFormatter": "redhat.vscode-yaml"
         },
-
         "terraform.languageServer": {
           "external": true
         },
-
         "terraform.codelens.enabled": true
       }
     }

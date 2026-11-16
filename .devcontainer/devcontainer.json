@@ -10,6 +10,7 @@
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": true,
       "configureZshAsDefaultShell": true
+    }
   },
   "postCreateCommand": "bash .devcontainer/install-conftest.sh",
   "customizations": {
@@ -22,7 +23,7 @@
         "ms-azuretools.vscode-docker",
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-azuretools.vscode-bicep",
+        "ms-azuretools.vscode-bicep"
       ],
       "settings": {
         "editor.formatOnSave": true,

@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=../../schemas/project.schema.json
+
+project:
+  key: "ssis-manager"
+  name: "SSIS Manager"
+  description: "Hosts the SSIS Manager API and Power repositories."
+  archetype: "standard-microservice"
+  process_template: "Agile"
+
+  features:
+    boards: "enabled"
+    repositories: "enabled"
+    pipelines: "enabled"
+    testplans: "disabled"
+    artifacts: "enabled"
+
+  branch_policy_dials:
+    min_reviewers: 2
+    reset_votes_on_new_push: true
+    require_work_item_linking: true
+    require_comment_resolution: true
+    build_validation_expiry_hours: 24
+    allowed_merge_types:
+      squash: false
+      no_fast_forward: true
+      rebase: false
+      rebase_merge: false
+
+  teams:
+    - name: "SSIS Manager Developers"
+      description: "Development contributors for SSIS Manager"
+      role: "contributor"
+    - name: "SSIS Manager Maintainers"
+      description: "Technical leads and production deployment approvers"
+      role: "lead"
+
+  repositories:
+    - name: "api"
+      default_branch: "refs/heads/main"
+    - name: "power"
+      default_branch: "refs/heads/main"
+
+  environments:
+    - name: "dev"
+      description: "Development environment"
+      require_approval: false
+    - name: "staging"
+      description: "Pre-production staging environment"
+      require_approval: false
+    - name: "prod"
+      description: "Production environment"
+      require_approval: true
+      approver_team: "SSIS Manager Maintainers"

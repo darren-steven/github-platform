@@ -104,6 +104,41 @@ def main():
     groups_data = load_yaml("config/groups.yaml")
     validate_against_schema(groups_data, groups_schema, "config/groups.yaml")
 
+    identity_schema = load_json("schemas/identity-bootstrap.schema.json")
+    identity_data = load_yaml("config/identity-bootstrap.yaml")
+    validate_against_schema(identity_data, identity_schema, "config/identity-bootstrap.yaml")
+    if isinstance(identity_data, dict):
+        plan_group = identity_data.get("plan_group")
+        if not isinstance(plan_group, dict):
+            plan_group = {}
+        apply_group = identity_data.get("apply_group")
+        if not isinstance(apply_group, dict):
+            apply_group = {}
+        if (
+            "display_name" in plan_group
+            and "display_name" in apply_group
+            and plan_group["display_name"] == apply_group["display_name"]
+        ):
+            errors.append("config/identity-bootstrap.yaml: plan_group and apply_group must have different display_name values")
+        for field in ("member_object_ids", "owner_object_ids"):
+            values = plan_group.get(field, [])
+            if isinstance(values, list) and all(isinstance(value, str) for value in values) and len(values) != len(set(values)):
+                errors.append(f"config/identity-bootstrap.yaml: plan_group.{field} must not contain duplicate object IDs")
+        eligible_members = apply_group.get("eligible_member_object_ids", [])
+        if (
+            isinstance(eligible_members, list)
+            and all(isinstance(value, str) for value in eligible_members)
+            and len(eligible_members) != len(set(eligible_members))
+        ):
+            errors.append("config/identity-bootstrap.yaml: apply_group.eligible_member_object_ids must not contain duplicate object IDs")
+        project_names = identity_data.get("plan_project_names", [])
+        if (
+            isinstance(project_names, list)
+            and all(isinstance(value, str) for value in project_names)
+            and len(project_names) != len(set(project_names))
+        ):
+            errors.append("config/identity-bootstrap.yaml: plan_project_names must not contain duplicate project names")
+
     project_schema = load_json("schemas/project.schema.json")
     secret_keywords = ["SECRET", "PASSWORD", "PASSWD", "TOKEN", "API_KEY", "APIKEY", "PRIVATE_KEY", "CONNECTION_STRING", "CONN_STR", "CLIENT_SECRET", "PAT"]
 
@@ -164,7 +199,10 @@ def main():
             print(f"  FAIL: {error}", file=sys.stderr)
         return 1
 
-    print(f"  PASS: Validated config/org.yaml, config/groups.yaml, and {len(project_files)} project file(s).")
+    print(
+        f"  PASS: Validated config/org.yaml, config/groups.yaml, "
+        f"config/identity-bootstrap.yaml, and {len(project_files)} project file(s)."
+    )
     return 0
 
 

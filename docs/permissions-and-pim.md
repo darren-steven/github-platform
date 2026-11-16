@@ -19,29 +19,40 @@ that supports all these operations, it can replace Project Collection
 Administrators; validate it against a complete plan and apply before relying on
 it.
 
-## Configure the Entra groups and PIM
+## Manage the groups with identity bootstrap
 
-An Entra administrator should configure the following:
+The separate `identity-bootstrap` environment creates the Entra groups, links
+them to Azure DevOps, grants the plan group collection-level view and project
+Readers permissions, and creates PIM-eligible memberships for the apply group.
+Configure [`identity-bootstrap.yaml`](../config/identity-bootstrap.yaml):
 
-1. Create an Entra security group for plan readers and another for apply
-   operators. Use organization-approved names, for example
-   `AzDO IaC Plan Readers` and `AzDO IaC Apply Operators`.
-2. Add the plan group to the Azure DevOps organization. Grant it **Readers**
-   access in each project managed by this repository. Grant only the
-   organization-level **view/read** permissions needed to inspect organization
-   settings, groups, and agent pools. Do not grant edit or administration rights
-   to this group.
-3. Add the apply group to the Azure DevOps **Project Collection
-   Administrators** group. In Entra Privileged Identity Management (PIM) for
-   Groups, configure users as **eligible** members of the apply group rather
-   than permanently active members.
-4. Apply the organization's PIM activation controls to the apply group. At a
-   minimum, require MFA and a justification; use approval, activation duration,
-   notifications, and access reviews according to organizational policy.
-5. Confirm the Azure DevOps organization recognizes the group membership and
-   that each operator has an appropriate Azure DevOps access level. Azure
-   subscription Owner or Contributor roles alone do not grant Azure DevOps
-   permissions.
+1. Add Entra user **object IDs** to `apply_group.eligible_member_object_ids`.
+   These create permanent *eligibility* schedules, not standing group
+   membership. Leave the list empty until approved operators are identified.
+2. Add the plan users' Entra object IDs to `plan_group.member_object_ids` to
+   give them standing membership in the read-only group.
+3. Set `plan_project_names` to the names of existing projects that require
+   OpenTofu plan access. The module adds the plan group to each project's
+   built-in **Readers** group. Leave the list empty if the organization has no
+   projects yet.
+4. Optionally set `plan_group.owner_object_ids` to the approved owners'
+   object IDs. The apply group is intentionally created without owners or
+   direct members; manage its eligibility through PIM and this configuration,
+   not by adding permanent members in Entra.
+
+The apply group is linked to Azure DevOps **Project Collection
+Administrators**. That is intentionally broad because `prod-org` manages
+organization settings and resources across projects. The identity bootstrap
+must be run by an operator with both the required Entra directory permissions
+(Group Administrator/User Administrator for group creation and Privileged Role
+Administrator for PIM eligibility management, or Global Administrator) and
+Azure DevOps Project Collection Administrator access. Azure subscription
+Owner or Contributor roles alone do not grant either permission.
+
+PIM activation policy settings—such as MFA, justification, approval, and
+maximum activation duration—are not configured by this Terraform module.
+Configure and review those in Entra PIM for Groups according to organizational
+policy. The module manages the group and its eligible member schedules.
 
 Azure DevOps and Entra group membership changes can take time to propagate.
 After activating PIM, refresh the Azure CLI sign-in if permissions are not
@@ -66,6 +77,32 @@ az login --tenant <tenant-id>
 The script runs repository validation and then runs OpenTofu in
 `environments/prod-org`. Planning does not need PIM apply activation when the
 standing plan permissions are configured correctly.
+
+### Run the identity bootstrap
+
+The bootstrap uses a distinct OpenTofu root and state. Configure a dedicated,
+protected backend in
+[`environments/identity-bootstrap/versions.tf`](../environments/identity-bootstrap/versions.tf)
+before using this beyond initial local testing; never reuse the `prod-org`
+state key. Then sign in as an authorized Entra and Azure DevOps administrator
+and run:
+
+```bash
+az login --tenant <tenant-id>
+./scripts/tofu-local.sh --environment identity-bootstrap init
+./scripts/tofu-local.sh --environment identity-bootstrap plan -out=tfplan
+./scripts/tofu-local.sh --environment identity-bootstrap apply tfplan
+```
+
+Review the plan carefully: it associates the apply group with the collection
+administrator group. This bootstrap path is intentionally not run by the
+routine pull-request workflow. Once applied, configure the apply group's PIM
+activation policy and verify the eligible users can activate and obtain the
+expected Azure DevOps access. Remove the saved plan afterward:
+
+```bash
+rm environments/identity-bootstrap/tfplan
+```
 
 ### Apply with PIM elevation
 
@@ -105,7 +142,12 @@ managed separately.
 
 - The plan group must have read access to all existing managed resources,
   including organization-level resources; project Readers alone may not cover
-  organization settings or agent pools.
+  organization settings or agent pools. The bootstrap grants collection-level
+  **View instance-level information**; verify that your organization also
+  permits reading its agent pools and other organization-scoped resources.
+- The bootstrap grants project Readers access only to the project names listed
+  in `plan_project_names`. Organization-level view permissions may still need a
+  separate approved assignment.
 - An OpenTofu plan is not a guaranteed read-only preview in every workflow:
   use only `plan` with the plan group. Do not use `apply`, `destroy`, or
   state-mutating commands without the separately authorized operational

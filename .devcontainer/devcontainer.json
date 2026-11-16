@@ -1,0 +1,56 @@
+{
+  "name": "azdo-iac",
+
+  "features": {
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "version": "1.13.3"
+    },
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "hashicorp.terraform",
+        "redhat.vscode-yaml",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "ms-azuretools.vscode-docker",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-bicep",
+        "yzhang.markdown-all-in-one"
+],
+
+      "settings": {
+        "editor.formatOnSave": true,
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
+
+        "[terraform]": {
+          "editor.defaultFormatter": "hashicorp.terraform"
+        },
+
+        "[terraform-vars]": {
+          "editor.defaultFormatter": "hashicorp.terraform"
+        },
+
+        "[yaml]": {
+          "editor.defaultFormatter": "redhat.vscode-yaml"
+        },
+
+        "terraform.languageServer": {
+          "external": true
+        },
+
+        "terraform.codelens.enabled": true
+      }
+    }
+  }
+}

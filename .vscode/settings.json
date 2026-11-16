@@ -10,5 +10,16 @@
   "files.associations": {
     "*.rego": "rego",
     "*.tf": "terraform"
-  }
+  },
+  "recommendations": [
+    "hashicorp.terraform",
+    "redhat.vscode-yaml",
+    "github.vscode-github-actions",
+    "github.vscode-pull-request-github",
+    "ms-azuretools.vscode-docker",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-azuretools.vscode-bicep",
+    "yzhang.markdown-all-in-one"
+  ]
 }

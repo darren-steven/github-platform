@@ -4,12 +4,23 @@ This guide explains how to make changes safely in `AzDo-IaC`, regardless of your
 
 ---
 
-## 1. Which Role Are You Acting In?
+## 1. Choose Your Path
+
+For routine project work, use the **Maintainer / Contributor** path. You can update YAML and run the validation script without learning OpenTofu. Only use the Platform Engineer path when changing the rules or infrastructure engine itself.
 
 | Role | What You Edit | What You Need to Know |
 | :--- | :--- | :--- |
-| **Maintainer / Contributor** | `config/projects/*.yaml`, `config/groups.yaml`, `config/org.yaml` | **YAML only.** You do not need to write OpenTofu/HCL. Your IDE and `./scripts/validate.sh` will automatically validate your changes against the organization's security bounds. |
-| **Platform Engineer** | `modules/`, `schemas/`, `policies/`, `environments/`, `.agents/skills/` | **OpenTofu + JSON Schema + OPA Rego.** You maintain the baseline engine and expose bounded dials for maintainers. |
+| **Maintainer / Contributor** | [`config/projects/`](../config/projects/), [`config/groups.yaml`](../config/groups.yaml), [`config/org.yaml`](../config/org.yaml) | YAML configuration only. Use the schema guidance in the files and run `./scripts/validate.sh` to check your changes. Project files are usually project-scoped; organization settings can affect the whole organization. |
+| **Platform Engineer** | [`modules/`](../modules/), [`schemas/`](../schemas/), [`policies/`](../policies/), [`environments/`](../environments/), [`.agents/skills/`](../.agents/skills/) | OpenTofu/HCL, JSON Schema, and OPA/Rego. You maintain the engine and the guardrails that safely expose configuration to maintainers. |
+
+### Maintainer quick path
+
+1. Edit the relevant YAML file in `config/`.
+2. Keep settings within the bounds documented in the [dials and baselines catalog](./dials-catalog.md).
+3. Run `./scripts/validate.sh`.
+4. Open a pull request and review the validation results and proposed plan.
+
+If a setting is blocked by a schema or policy, do not change the engine just to make it pass. Ask a Platform Engineer if the available configuration options do not meet your need.
 
 ---
 
@@ -45,3 +56,13 @@ This repository includes built-in AI skills and guardrails that work identically
    ```
 5. **Open a Pull Request**:
    - The CI pipeline will run `./scripts/validate.sh` and `tofu plan`, posting the planned Azure DevOps changes on your PR.
+
+## 4. Platform Engineering (Usually Not Needed for Project Changes)
+
+Platform Engineers maintain the underlying infrastructure implementation, not individual project settings:
+
+- `modules/` and `environments/` define how Azure DevOps resources are provisioned.
+- `schemas/` and `policies/` define which YAML configurations are allowed.
+- `.agents/skills/` contains shared AI-assisted workflows and guardrails.
+
+Changes to these areas can affect multiple projects or the organization and require the appropriate platform review. Read the [architecture reference](../ARCHITECTURE.md) for the infrastructure data flow and the [dials and baselines catalog](./dials-catalog.md) to understand which settings are intentionally available to maintainers.

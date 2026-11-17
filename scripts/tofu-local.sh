@@ -4,13 +4,14 @@
 # =============================================================================
 # Authenticates to Azure DevOps using your active `az login` session (fetching
 # a short-lived Entra ID token for Azure DevOps in memory—zero PATs on disk)
-# and runs OpenTofu in `environments/prod-org`.
+# and runs OpenTofu in the selected environment.
 #
 # Usage:
 #   ./scripts/tofu-local.sh init
 #   ./scripts/tofu-local.sh plan
 #   ./scripts/tofu-local.sh apply
 #   ./scripts/tofu-local.sh destroy
+#   ./scripts/tofu-local.sh --environment identity-bootstrap plan
 # =============================================================================
 
 set -euo pipefail
@@ -18,8 +19,26 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${REPO_ROOT}"
 
+ENVIRONMENT="prod-org"
+if [[ "${1:-}" == "--environment" ]]; then
+  if [[ $# -lt 3 ]]; then
+    echo "Usage: ./scripts/tofu-local.sh [--environment <prod-org|identity-bootstrap>] <init|plan|apply|destroy|...> [args]" >&2
+    exit 1
+  fi
+  ENVIRONMENT="$2"
+  shift 2
+fi
+
+case "${ENVIRONMENT}" in
+  prod-org|identity-bootstrap) ;;
+  *)
+    echo "ERROR: Unsupported environment '${ENVIRONMENT}'. Choose 'prod-org' or 'identity-bootstrap'." >&2
+    exit 1
+    ;;
+esac
+
 if [[ $# -eq 0 ]]; then
-  echo "Usage: ./scripts/tofu-local.sh <init|plan|apply|destroy|...> [args]"
+  echo "Usage: ./scripts/tofu-local.sh [--environment <prod-org|identity-bootstrap>] <init|plan|apply|destroy|...> [args]"
   exit 1
 fi
 
@@ -39,7 +58,16 @@ fi
 
 export AZDO_ORG_SERVICE_URL="${ORG_URL}"
 
-# 3. Acquire short-lived Azure DevOps token from `az login` if AZDO_PERSONAL_ACCESS_TOKEN is not set
+# 3. Identity bootstrap also requires an active Azure CLI session for AzureAD provider authentication
+if [[ "${ENVIRONMENT}" == "identity-bootstrap" ]]; then
+  if ! command -v az >/dev/null 2>&1; then
+    echo "ERROR: Azure CLI ('az') is required for the identity-bootstrap environment." >&2
+    exit 1
+  fi
+  az account show >/dev/null
+fi
+
+# 4. Acquire short-lived Azure DevOps token from `az login` if AZDO_PERSONAL_ACCESS_TOKEN is not set
 if [[ -z "${AZDO_PERSONAL_ACCESS_TOKEN:-}" ]]; then
   if ! command -v az >/dev/null 2>&1; then
     echo "ERROR: Azure CLI ('az') not found on PATH and AZDO_PERSONAL_ACCESS_TOKEN is not set." >&2
@@ -52,8 +80,8 @@ if [[ -z "${AZDO_PERSONAL_ACCESS_TOKEN:-}" ]]; then
   export AZDO_PERSONAL_ACCESS_TOKEN
 fi
 
-# 4. Run OpenTofu inside environments/prod-org
-cd "${REPO_ROOT}/environments/prod-org"
+# 5. Run OpenTofu inside the selected environment
+cd "${REPO_ROOT}/environments/${ENVIRONMENT}"
 echo ""
-echo "Running: tofu $* (Target Org: ${AZDO_ORG_SERVICE_URL})"
+echo "Running: tofu $* (Environment: ${ENVIRONMENT}; Target Org: ${AZDO_ORG_SERVICE_URL})"
 exec tofu "$@"

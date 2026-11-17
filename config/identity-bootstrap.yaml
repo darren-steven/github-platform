@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=../schemas/identity-bootstrap.schema.json
+# Identity bootstrap is a separately-administered, high-privilege environment.
+# Populate object IDs and project names only after reviewing docs/permissions-and-pim.md.
+
+plan_group:
+  display_name: "AzDO IaC Plan Readers"
+  description: "Standing read-only access for OpenTofu plans against managed Azure DevOps projects."
+  member_object_ids: []
+  owner_object_ids: []
+
+apply_group:
+  display_name: "AzDO IaC Apply Operators"
+  description: "PIM-eligible group for approved OpenTofu applies to the Azure DevOps organization."
+  eligible_member_object_ids: []
+
+# Existing Azure DevOps project names that should grant the plan group Readers access.
+plan_project_names: []

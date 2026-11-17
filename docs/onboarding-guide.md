@@ -57,6 +57,11 @@ This repository includes built-in AI skills and guardrails that work identically
 5. **Open a Pull Request**:
    - The CI pipeline will run `./scripts/validate.sh` and `tofu plan`, posting the planned Azure DevOps changes on your PR.
 
+Before running OpenTofu against Azure DevOps, make sure your standing
+permissions allow planning and use time-limited PIM elevation for applies. See
+the [OpenTofu access and Azure PIM guide](./permissions-and-pim.md) for the
+required access setup and commands.
+
 ## 4. Platform Engineering (Usually Not Needed for Project Changes)
 
 Platform Engineers maintain the underlying infrastructure implementation, not individual project settings:

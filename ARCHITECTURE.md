@@ -1,4 +1,4 @@
-Here is how the OpenTofu codebase works end-to-end—tracing the flow from the YAML configuration files in `config/` through the root orchestrator in `environments/prod-org` down to each of the 5 reusable modules in `modules/`.
+Here is how the OpenTofu codebase works end-to-end—tracing the flow from the YAML configuration files in `config/` through the root orchestrator in `environments/prod-org` down to the reusable modules in `modules/`, plus the separate privileged identity bootstrap.
 
 ---
 
@@ -13,13 +13,30 @@ config/projects/*.yaml ──┘              │
                                         │
                                         └──► 3. module "projects" [for_each project] (modules/project-archetype)
                                                   └──► 4. module "security_constants" (modules/security-namespaces)
+
+config/identity-bootstrap.yaml ──► environments/identity-bootstrap
+                                         └──► modules/identity-bootstrap
+                                               ├──► Entra groups & PIM eligibility
+                                               └──► Azure DevOps group membership
 ```
 
 ---
 
+## Separate Identity Bootstrap
+
+[`environments/identity-bootstrap`](environments/identity-bootstrap) is a
+separate, high-privilege OpenTofu root with its own state. It creates the plan
+and apply Entra groups, assigns eligible users to the apply group through PIM,
+links the groups to Azure DevOps, grants the plan group collection-level view,
+and grants Readers access to configured existing projects. Run it only through
+the reviewed administrative process described in
+[`docs/permissions-and-pim.md`](docs/permissions-and-pim.md). PIM activation
+policy settings remain managed in Entra PIM because this environment only
+manages group identity and eligible membership schedules.
+
 ## 0. Root Orchestrator: `environments/prod-org`
 
-The `environments/prod-org` folder is the **only place where `tofu init / plan / apply` is executed**. It contains zero raw `resource` blocks; its job is to decode YAML, merge defaults, and wire the modules together.
+The `environments/prod-org` folder is the root for routine Azure DevOps organization `tofu init / plan / apply` operations. It contains zero raw `resource` blocks; its job is to decode YAML, merge defaults, and wire the modules together. Privileged Entra group and PIM eligibility changes use the separate `environments/identity-bootstrap` root and state.
 
 * **[versions.tf](environments/prod-org/versions.tf#L1-L24)**:
   * Pins OpenTofu `>= 1.8.0` and the `microsoft/azuredevops` and `Mastercard/restapi` providers, plus a ready-to-uncomment `azurerm` remote state backend block.

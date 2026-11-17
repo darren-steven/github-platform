@@ -52,7 +52,7 @@ Manages organization-level identity groups, agent pools, and invokes the REST AP
 * **[main.tf](modules/org-baseline/main.tf#L1-L52)**:
   * **Indexing ([lines 7–10](modules/org-baseline/main.tf#L7-L10))**: Converts the YAML lists of groups and agent pools into `for_each` maps keyed by `name`. This ensures removing or reordering a group in YAML only touches that specific group in Azure DevOps.
   * **`azuredevops_group.org_groups` ([lines 22–28](modules/org-baseline/main.tf#L22-L28))**: Creates organization-scoped security groups (or links to an Entra ID Group if `entra_group_origin_id` is supplied) and prefixes descriptions with `[ROLE-TIER]`.
-  * **`azuredevops_agent_pool.pools` ([lines 30–37](modules/org-baseline/main.tf#L30-L37))**: Creates organization-level agent pools (`contoso-linux-mdp`, `contoso-regulated-mdp`) with `auto_provision = false` so pools aren't automatically exposed to every project without explicit authorization.
+  * **`azuredevops_agent_pool.pools` ([lines 30–37](modules/org-baseline/main.tf#L30-L37))**: Creates organization-level agent pools (`taswater-linux-mdp`, `taswater-regulated-mdp`) with `auto_provision = false` so pools aren't automatically exposed to every project without explicit authorization.
 
 ---
 

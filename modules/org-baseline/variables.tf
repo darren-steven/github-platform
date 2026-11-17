@@ -31,6 +31,12 @@ variable "organization_groups" {
   }
 }
 
+variable "member_emails" {
+  description = "Deduplicated set of user principal names (emails) across all organization groups and project teams to entitle in the organization."
+  type        = set(string)
+  default     = []
+}
+
 variable "agent_pools" {
   description = "Organization-level agent pools from config/org.yaml."
   type = list(object({

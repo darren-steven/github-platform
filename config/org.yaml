@@ -78,11 +78,11 @@ repository_defaults:
 # Organization-Level Agent Pools
 # -----------------------------------------------------------------------------
 agent_pools:
-  - name: "contoso-linux-mdp"
+  - name: "taswater-linux-mdp"
     pool_type: "automation"
     auto_provision: false
     auto_update: true
-  - name: "contoso-regulated-mdp"
+  - name: "taswater-regulated-mdp"
     pool_type: "automation"
     auto_provision: false
     auto_update: true

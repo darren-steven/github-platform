@@ -1,7 +1,5 @@
 Here is a tour of what you will see in **`https://dev.azure.com/tofutest`**, mapped to the **Tier 1 (Locked Baselines)** and **Tier 2/3 (YAML Dials)** that created them:
 
-It has been verified against a Live AzDo orgainsation, executed locally from a workstation with an az cli login (no PAT required)
-
 ---
 
 ### 1. Organization-Level Settings (`https://dev.azure.com/tofutest/_settings/`)
@@ -14,7 +12,7 @@ It has been verified against a Live AzDo orgainsation, executed locally from a w
     * **AzDO IaC Control Plane Automation** (`[SERVICE-PRINCIPAL-AUTOMATION] ...`)
 * **Organization settings → Pipelines → Agent pools (`/_settings/agentpools`)**
   * You will see the 2 custom pools from [config/org.yaml](../config/org.yaml):
-    * **`contoso-linux-mdp`** and **`contoso-regulated-mdp`** (with auto-provisioning across all projects turned **Off** for least privilege).
+    * **`taswater-linux-mdp`** and **`taswater-regulated-mdp`** (with auto-provisioning across all projects turned **Off** for least privilege).
 
 ---
 

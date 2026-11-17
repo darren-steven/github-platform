@@ -30,9 +30,9 @@ fi
 ORG_URL="$(python3 -c 'import yaml; print(yaml.safe_load(open("config/org.yaml"))["organization"]["service_url"])')"
 ORG_NAME="$(python3 -c 'import yaml; print(yaml.safe_load(open("config/org.yaml"))["organization"]["name"])')"
 
-if [[ "${ORG_NAME}" == "contoso-engineering" ]]; then
+if [[ "${ORG_NAME}" == "taswater-engineering" ]]; then
   echo ""
-  echo "ERROR: config/org.yaml still has placeholder organization.name 'contoso-engineering'." >&2
+  echo "ERROR: config/org.yaml still has placeholder organization.name 'taswater-engineering'." >&2
   echo "Please update organization.name and organization.service_url in config/org.yaml to your Azure DevOps org first." >&2
   exit 1
 fi

@@ -7,8 +7,40 @@ module "security_constants" {
 }
 
 locals {
-  teams_by_name        = { for t in var.teams : t.name => t }
-  repos_by_name        = { for r in var.repositories : r.name => r }
+  teams_by_name = { for t in var.teams : t.name => t }
+
+  # Unique user emails across all teams in this project (normalized to lowercase)
+  team_member_emails = toset(flatten([
+    for t in var.teams : [
+      for m in coalesce(t.members, []) : lower(trimspace(m))
+    ]
+  ]))
+
+  # Only create project-scoped fallback user entitlements for emails not already
+  # provided via var.user_descriptors (prevents duplicate entitlement conflicts across projects)
+  unentitled_team_member_emails = toset([
+    for email in local.team_member_emails :
+    email if !contains(keys(var.user_descriptors), email)
+  ])
+
+  # Explicit repositories declared in YAML
+  explicit_repos_by_name = { for r in var.repositories : r.name => r }
+
+  # Combined map of all governed repositories (including the default '<project_name>'
+  # repository when create_default_repository = true) so branch policies and
+  # team permissions apply uniformly to all of them.
+  repos_by_name = merge(
+    local.explicit_repos_by_name,
+    var.create_default_repository ? {
+      (var.project_name) = {
+        name                           = var.project_name
+        default_branch                 = "refs/heads/main"
+        build_validation_pipeline_name = null
+        path_reviewers                 = []
+      }
+    } : {}
+  )
+
   environments_by_name = { for e in var.environments : e.name => e }
   var_groups_by_name   = { for vg in var.variable_groups : vg.name => vg }
 
@@ -68,18 +100,39 @@ resource "azuredevops_project_pipeline_settings" "this" {
 }
 
 # -----------------------------------------------------------------------------
-# 2. Teams & Least-Privilege Repository Permissions
+# 2. Teams, User Entitlements & Least-Privilege Repository Permissions
 # -----------------------------------------------------------------------------
+resource "azuredevops_user_entitlement" "team_members" {
+  for_each = local.unentitled_team_member_emails
+
+  principal_name       = each.value
+  account_license_type = "express"
+  licensing_source     = "account"
+}
+
+locals {
+  resolved_user_descriptors = merge(
+    var.user_descriptors,
+    { for email, u in azuredevops_user_entitlement.team_members : email => u.descriptor }
+  )
+}
+
 resource "azuredevops_team" "teams" {
   for_each = local.teams_by_name
 
   project_id  = azuredevops_project.this.id
   name        = each.value.name
   description = each.value.description
+  members = [
+    for m in coalesce(each.value.members, []) :
+    local.resolved_user_descriptors[lower(trimspace(m))]
+  ]
 }
 
+# Step 2a: Create explicit repositories declared in YAML first (ensures at least
+# one repository exists in the project before deleting Azure DevOps's unmanaged default stub).
 resource "azuredevops_git_repository" "repos" {
-  for_each = local.repos_by_name
+  for_each = local.explicit_repos_by_name
 
   project_id     = azuredevops_project.this.id
   name           = each.value.name
@@ -90,11 +143,62 @@ resource "azuredevops_git_repository" "repos" {
   }
 }
 
+# Step 2b: Reconcile the project's default '<project_name>' repository:
+# - When create_default_repository = false: deletes the unmanaged '<project_name>' repository on create,
+#   and re-creates a temporary placeholder on destroy so OpenTofu can cleanly delete all explicit
+#   repositories without hitting Azure DevOps's 'Cannot delete the last repository in the project' error.
+# - When create_default_repository = true: adopts the existing '<project_name>' repository in-place
+#   (or creates it if previously deleted) and initializes refs/heads/main if empty.
+resource "terraform_data" "reconcile_default_repository" {
+  depends_on = [azuredevops_git_repository.repos]
+
+  input = {
+    script_path               = "${path.module}/scripts/reconcile_default_repo.py"
+    org_service_url           = var.org_service_url
+    project_id                = azuredevops_project.this.id
+    project_name              = var.project_name
+    create_default_repository = tostring(var.create_default_repository)
+  }
+
+  triggers_replace = [
+    azuredevops_project.this.id,
+    var.project_name,
+    tostring(var.create_default_repository)
+  ]
+
+  provisioner "local-exec" {
+    command = "python3 \"${self.input.script_path}\" apply \"${self.input.org_service_url}\" \"${self.input.project_id}\" \"${self.input.project_name}\" \"${self.input.create_default_repository}\""
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "python3 \"${self.input.script_path}\" destroy \"${self.input.org_service_url}\" \"${self.input.project_id}\" \"${self.input.project_name}\" \"${self.input.create_default_repository}\""
+  }
+}
+
+# Step 2c: When create_default_repository = true, look up the initialized '<project_name>'
+# repository so OpenTofu attaches all branch policies and team permissions to it.
+data "azuredevops_git_repository" "default_repo" {
+  count      = var.create_default_repository ? 1 : 0
+  depends_on = [terraform_data.reconcile_default_repository]
+
+  project_id = azuredevops_project.this.id
+  name       = var.project_name
+}
+
+locals {
+  # Unified map of repository name -> repository ID across explicit + optional default repo
+  all_managed_repo_ids = merge(
+    { for k, r in azuredevops_git_repository.repos : k => r.id },
+    var.create_default_repository ? { (var.project_name) = data.azuredevops_git_repository.default_repo[0].id } : {}
+  )
+}
+
 resource "azuredevops_git_permissions" "team_repo_access" {
   for_each = local.team_repo_permissions
 
   project_id    = azuredevops_project.this.id
-  repository_id = azuredevops_git_repository.repos[each.value.repo_name].id
+  repository_id = local.all_managed_repo_ids[each.value.repo_name]
   principal     = azuredevops_team.teams[each.value.team_name].descriptor
   replace       = false
 

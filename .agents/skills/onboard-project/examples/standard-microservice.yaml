@@ -34,12 +34,12 @@ project:
       description: "Core engineering team for Payments API"
       role: "contributor"
       members:
-        - "payments-devs@taswatercom"
+        - "payments-devs@taswater.com"
     - name: "Payments Leads"
       description: "Tech leads and release approvers"
       role: "lead"
       members:
-        - "payments-leads@taswatercom"
+        - "payments-leads@taswater.com"
 
   repositories:
     - name: "payments-service"

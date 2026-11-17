@@ -1,7 +1,3 @@
-Analyzed main.tf:L1-105
-Analyzed main.tf:L1-155
-Analyzed branch_policies.tf:L1-128
-
 Here is how the OpenTofu codebase works end-to-end—tracing the flow from the YAML configuration files in `config/` through the root orchestrator in `environments/prod-org` down to each of the 5 reusable modules in `modules/`.
 
 ---

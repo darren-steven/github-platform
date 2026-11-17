@@ -1,40 +1,45 @@
 # Azure DevOps Organization IaC (`AzDo-IaC`)
 
-Declarative **Infrastructure-as-Code (OpenTofu)** framework for governing an **Azure DevOps Organization** using a **"Hardened Baseline + Exposed Dials"** model, equipped with cross-agent AI skills and guardrails for **Google Gemini (Antigravity / Gemini CLI)** and **GitHub Copilot**.
+This repository manages Azure DevOps projects and organization settings. **Most maintainers only need to edit YAML files in `config/` and run the validation script.** You do not need to know OpenTofu to update a project.
 
----
+## For project maintainers
 
-## Architecture Overview
+### Change or onboard a project
 
-1. **Declarative Configuration Surface (`config/`)**:
-   - Maintainers of all skill levels configure the organization (`config/org.yaml`), groups (`config/groups.yaml`), and projects (`config/projects/*.yaml`) via schema-validated YAML files.
-2. **Multi-Layer Guardrails (`schemas/`, `policies/`, `scripts/validate.sh`)**:
-   - Every change is verified against JSON Schemas (for real-time IDE autocomplete and bounds checking), OPA/Rego policy rules, and OpenTofu variable validations before reaching Azure DevOps.
-3. **Protected OpenTofu Engine (`modules/`, `environments/`)**:
-   - **Tier 1 Immutable Baselines** (such as private-only projects, blocking PR reviews on `main`, no self-approval, disabled classic pipelines, and Entra ID Conditional Access) are locked in HCL modules.
-   - **Tier 2 Bounded Dials** (such as minimum reviewer count `2..5`, build validation expiration `12h..72h`, and merge strategy toggles) are exposed within safe bounds.
-   - Includes a dedicated **REST API Bridge (`modules/org-settings-api-bridge`)** for Azure DevOps organization-level settings not natively supported by the `microsoft/azuredevops` provider.
-4. **Cross-Agent AI Skills & Guardrails (`AGENTS.md`, `GEMINI.md`, `.agents/skills/`, `.github/`)**:
-   - Synchronized instructions and skills ensure both Gemini and GitHub Copilot guide contributors safely and never weaken baseline modules to bypass policy errors.
+1. Edit the existing project file in `config/projects/`, or follow the [project onboarding guide](./docs/onboarding-guide.md) to add one. The [example project](./config/projects/example-service.yaml) shows the available structure.
+2. Keep changes within the documented settings and allowed bounds in the [dials and baselines catalog](./docs/dials-catalog.md).
+3. Run the local checks:
+   ```bash
+   ./scripts/validate.sh
+   ```
+4. Open a pull request. CI validates the change and posts an OpenTofu plan for review before it is applied.
 
----
+### Change organization settings
 
-## Quick Start
+Organization-wide settings live in [`config/org.yaml`](./config/org.yaml); shared groups live in [`config/groups.yaml`](./config/groups.yaml). These changes can affect the whole organization, so check the [dials and baselines catalog](./docs/dials-catalog.md) and required approvals before changing them.
 
-### 1. Validate Configuration & Guardrails Locally
-```bash
-./scripts/validate.sh
-```
+## Where to go
 
-### 2. Common Maintainer Workflows
-- **Adjust an Org or Project Dial**: Edit [config/org.yaml](./config/org.yaml) or `config/projects/<project>.yaml` (or use the `adjust-org-dial` AI skill).
-- **Onboard a New Project**: Scaffold `config/projects/<project-key>.yaml` from [config/projects/example-service.yaml](./config/projects/example-service.yaml) (or use the `onboard-project` AI skill).
+| If you need to… | Start here |
+| --- | --- |
+| Change a project, repository, team, or environment | [`config/projects/`](./config/projects/) |
+| Change organization-wide settings or groups | [`config/org.yaml`](./config/org.yaml), [`config/groups.yaml`](./config/groups.yaml) |
+| Check allowed settings and security limits | [Dials and baselines catalog](./docs/dials-catalog.md) |
+| Understand the repo layout and pull request workflow | [Contributor and maintainer guide](./docs/onboarding-guide.md) |
+| Change how the infrastructure engine works | [Platform engineering reference](./ARCHITECTURE.md) |
 
----
+## Repository map
 
-## Key Documentation & References
+| Area | Who usually works here | Purpose |
+| --- | --- | --- |
+| [`config/`](./config/) | Maintainers | YAML settings for the organization, groups, and projects. This is the normal day-to-day edit surface. |
+| [`docs/`](./docs/) | Everyone | How-to guides and the settings catalog. |
+| [`scripts/`](./scripts/) | Usually platform engineers | Local validation and OpenTofu helper scripts. Maintainers normally run these rather than change them. |
+| [`schemas/`](./schemas/), [`policies/`](./policies/) | Platform engineers | Define and enforce which configuration is allowed. |
+| [`modules/`](./modules/), [`environments/`](./environments/) | Platform engineers | OpenTofu engine and organization deployment wiring. |
+| [`.agents/`](./.agents/), [`.github/`](./.github/), [`AGENTS.md`](./AGENTS.md) | Platform engineers | AI assistant skills, repository automation, and contributor guardrails. |
+| [`.devcontainer/`](./.devcontainer/) | Tooling | Development-container setup; not part of project configuration. |
 
-- **[AI Agent Guardrails (`AGENTS.md`)](./AGENTS.md)**: Canonical rules for Gemini and GitHub Copilot.
-- **[Contributor & Maintainer Guide (`docs/onboarding-guide.md`)](./docs/onboarding-guide.md)**: Role-based onboarding and workflow instructions.
-- **[Dials & Baselines Catalog (`docs/dials-catalog.md`)](./docs/dials-catalog.md)**: Full reference of Tier 1 locked baselines and Tier 2 bounded dials.
-- **[AzDO Provider vs. REST API Matrix](./.agents/skills/author-azdo-module/references/azdo-api-gaps.md)**: Coverage reference for `microsoft/azuredevops` vs. `modules/org-settings-api-bridge`.
+## Platform engineering
+
+Changes to the engine, policy enforcement, schemas, or deployment wiring require platform engineering knowledge and review. They are **not** needed for routine project onboarding or configuration. See the [architecture reference](./ARCHITECTURE.md) for the infrastructure data flow and implementation details.

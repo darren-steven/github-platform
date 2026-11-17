@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://contoso.internal/schemas/azdo-org.schema.json",
+  "$id": "https://taswaterinternal/schemas/azdo-org.schema.json",
   "title": "Azure DevOps Organization Policy & Dials Schema",
   "description": "Validates organization-level configuration dials (Tier 2) against the Azure DevOps Organization baseline (Tier 1).",
   "type": "object",
@@ -16,12 +16,15 @@
     "organization": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "service_url"],
+      "required": [
+        "name",
+        "service_url"
+      ],
       "properties": {
         "name": {
           "type": "string",
           "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{1,62}$",
-          "description": "The Azure DevOps organization slug (e.g., 'contoso-engineering')."
+          "description": "The Azure DevOps organization slug (e.g., 'taswater-engineering')."
         },
         "service_url": {
           "type": "string",
@@ -30,7 +33,12 @@
         },
         "default_process_template": {
           "type": "string",
-          "enum": ["Agile", "Scrum", "CMMI", "Basic"],
+          "enum": [
+            "Agile",
+            "Scrum",
+            "CMMI",
+            "Basic"
+          ],
           "default": "Agile",
           "description": "Default work item process template for new projects unless overridden."
         }
@@ -120,7 +128,9 @@
       "properties": {
         "default_branch": {
           "type": "string",
-          "enum": ["refs/heads/main"],
+          "enum": [
+            "refs/heads/main"
+          ],
           "default": "refs/heads/main",
           "description": "Standard default branch name across the organization."
         },
@@ -156,12 +166,29 @@
         "allowed_merge_types": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["squash", "no_fast_forward", "rebase", "rebase_merge"],
+          "required": [
+            "squash",
+            "no_fast_forward",
+            "rebase",
+            "rebase_merge"
+          ],
           "properties": {
-            "squash": { "type": "boolean", "default": true },
-            "no_fast_forward": { "type": "boolean", "default": true },
-            "rebase": { "type": "boolean", "default": false },
-            "rebase_merge": { "type": "boolean", "default": false }
+            "squash": {
+              "type": "boolean",
+              "default": true
+            },
+            "no_fast_forward": {
+              "type": "boolean",
+              "default": true
+            },
+            "rebase": {
+              "type": "boolean",
+              "default": false
+            },
+            "rebase_merge": {
+              "type": "boolean",
+              "default": false
+            }
           }
         }
       }
@@ -172,7 +199,11 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "auto_provision", "auto_update"],
+        "required": [
+          "name",
+          "auto_provision",
+          "auto_update"
+        ],
         "properties": {
           "name": {
             "type": "string",
@@ -180,7 +211,10 @@
           },
           "pool_type": {
             "type": "string",
-            "enum": ["automation", "deployment"],
+            "enum": [
+              "automation",
+              "deployment"
+            ],
             "default": "automation"
           },
           "auto_provision": {

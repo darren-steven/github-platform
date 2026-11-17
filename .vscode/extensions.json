@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "tsandall.opa",
+        "hashicorp.terraform",
+        "opentofu.vscode-opentofu",
+        "redhat.vscode-yaml"
+    ]
+}

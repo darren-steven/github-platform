@@ -15,6 +15,22 @@ locals {
     yamldecode(file("${var.config_dir}/projects/${f}")).project.key =>
     yamldecode(file("${var.config_dir}/projects/${f}")).project
   }
+
+  # Deduplicated set of all user emails across organization groups and project teams
+  all_member_emails = toset(flatten([
+    [
+      for g in try(local.groups_config.organization_groups, []) : [
+        for m in try(g.members, []) : lower(trimspace(m))
+      ]
+    ],
+    [
+      for k, p in local.projects_by_key : [
+        for t in try(p.teams, []) : [
+          for m in try(t.members, []) : lower(trimspace(m))
+        ]
+      ]
+    ]
+  ]))
 }
 
 provider "azuredevops" {
@@ -41,6 +57,7 @@ module "org_baseline" {
   organization_name   = local.org_config.organization.name
   security_dials      = local.org_config.security_dials
   organization_groups = local.groups_config.organization_groups
+  member_emails       = local.all_member_emails
   agent_pools         = local.org_config.agent_pools
   enable_rest_bridge  = var.enable_rest_bridge
 }
@@ -52,13 +69,15 @@ module "projects" {
   source   = "../../modules/project-archetype"
   for_each = local.projects_by_key
 
-  project_key      = each.value.key
-  project_name     = each.value.name
-  description      = each.value.description
-  archetype        = each.value.archetype
-  process_template = try(each.value.process_template, local.org_config.organization.default_process_template)
-  features         = each.value.features
-  pipeline_dials   = local.org_config.pipeline_dials
+  org_service_url           = local.org_config.organization.service_url
+  project_key               = each.value.key
+  project_name              = each.value.name
+  description               = each.value.description
+  archetype                 = each.value.archetype
+  process_template          = try(each.value.process_template, local.org_config.organization.default_process_template)
+  create_default_repository = try(each.value.create_default_repository, false)
+  features                  = each.value.features
+  pipeline_dials            = local.org_config.pipeline_dials
 
   # Merge org-level repository_defaults with any project-specific dial overrides
   branch_policy_dials = {
@@ -88,10 +107,11 @@ module "projects" {
     )
   }
 
-  teams           = each.value.teams
-  repositories    = each.value.repositories
-  environments    = try(each.value.environments, [])
-  variable_groups = try(each.value.variable_groups, [])
+  teams            = each.value.teams
+  user_descriptors = module.org_baseline.user_descriptors
+  repositories     = each.value.repositories
+  environments     = try(each.value.environments, [])
+  variable_groups  = try(each.value.variable_groups, [])
 }
 
 output "enforced_org_settings" {

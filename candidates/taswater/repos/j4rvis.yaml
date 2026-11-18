@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: j4rvis
+  name: J4Rvis Domain
+  description: Repositories aligned to the J4Rvis domain in taswater.
+  organization: taswater
+defaults:
+  archetype: shared-library
+  topics:
+  - j4rvis
+  - taswater
+  team_access:
+  - team: j4rvis
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - j4rvis
+repositories:
+- name: AnyPoint
+  description: Configuration files to connect to TasWater development environment
+  archetype: standard-microservice
+- name: customer-ebilling-eapi-v1
+  description: Repository customer-ebilling-eapi-v1
+- name: ebilling-papi-v1
+  description: Repository ebilling-papi-v1
+- name: taswater-error-handling-util
+  description: Repository taswater-error-handling-util

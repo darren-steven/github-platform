@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: powershell
+  name: Powershell Domain
+  description: Repositories aligned to the Powershell domain in taswater.
+  organization: taswater
+defaults:
+  archetype: shared-library
+  topics:
+  - powershell
+  - taswater
+  team_access:
+  - team: bsa
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - bsa
+repositories:
+- name: PI-TaKaDu-Integration
+  description: Repository for all TaKaDu integration related code

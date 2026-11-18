@@ -5,7 +5,7 @@
 # Runs the multi-layer guardrail checks for GitHub Enterprise Cloud IaC:
 #   Layer 1: YAML Syntax, JSON Schema & Cross-File Referential Validation (`schemas/*.schema.json`)
 #   Layer 2: Baseline & Archetype Policy Gate (`policies/*.rego` + Python check)
-#   Layer 3: OpenTofu Formatting & Structural Validation (when HCL modules exist)
+#   Layer 3: Inventory Extraction & Candidate Generation Regression Tests
 #   Layer 4: Cross-Agent AI Skill & Prompt Synchronization Check
 # =============================================================================
 
@@ -40,10 +40,11 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# Layer 3: OpenTofu / Terraform Structural & Format Check (when present)
+# Layer 3: Inventory Extraction & Candidate Generator Regression Suite
 # -----------------------------------------------------------------------------
 echo ""
-echo "[3/4] Checking OpenTofu / HCL Structure & Guardrails..."
+echo "[3/4] Running Inventory Extraction & Domain Deduction Regression Tests..."
+python3 "${REPO_ROOT}/scripts/test_inventory_and_candidates.py"
 python3 "${REPO_ROOT}/scripts/validate_hcl.py"
 
 # -----------------------------------------------------------------------------

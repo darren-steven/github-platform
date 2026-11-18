@@ -1,0 +1,199 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: general-services
+  name: General Services Domain
+  description: Repositories aligned to the General Services domain in taswater.
+  organization: taswater
+defaults:
+  archetype: shared-library
+  topics:
+  - general-services
+  - taswater
+  team_access:
+  - team: bsa
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - bsa
+repositories:
+- name: .github
+  description: Repository .github
+- name: 761_anywhere_development
+  description: Anywhere repo used for 7.6.1 release
+  archetype: standard-microservice
+- name: 762_anywhere_development
+  description: Anywhere 762 Upgraded Source for TasWater
+  archetype: standard-microservice
+- name: anypoint-wrapper-cli
+  description: Wrapper for Mulesoft API
+  archetype: standard-microservice
+  team_access:
+  - team: h2go
+    permission: pull
+- name: Anywhere761full
+  description: Repository Anywhere761full
+  archetype: standard-microservice
+- name: automation
+  description: Repository automation
+- name: azdo-iac
+  description: AzureDevops IaC - AI Optimised
+- name: AzureNamingTool
+  description: The Azure Naming Tool is a .NET 8 Blazor application, with a RESTful
+    API. The UI consists of several pages to allow the configuration and generation
+    of Azure Resource names. The API provides a programmatic interface for the functionality.
+  archetype: standard-microservice
+  environments:
+  - name: Development
+    require_approval: false
+- name: BC-SSIS-Pipeline
+  description: SSIS pipeline extracting Business Central Online data to on-prem SQL
+    Server via ZappySys and OPENJSON
+- name: BI-DataFlow
+  description: BI data flow / ETL diagrams
+- name: BI_RealisedRevenue
+  description: 'Realised Revenue BI system. Business owner: Revenue Assurance team'
+- name: BillFileReconciliation
+  description: SSIS.  Gentrack upload and store data on Statement and Letter XML files
+    for reporting.
+- name: calc_IP_address_ranges
+  description: calculate IP address ranges from start and finish IP address
+  archetype: standard-microservice
+- name: centrelink_concession_bulk_verification
+  description: Repository centrelink_concession_bulk_verification
+- name: CIO-Pulse
+  description: Inhouse system to drive CIO Pulse requests from Service Centre
+- name: config
+  description: General repository for configuration files
+- name: Contacts-api
+  description: Repository Contacts-api
+- name: coo-prep-v3
+  description: Change-Of-Ownership prep system.  Version 3
+- name: cordova-plugin-inappbrowser
+  description: Mirror of Apache Cordova Plugin inappbrowser
+  archetype: standard-microservice
+- name: cornerstone-chris21-integration-report-syncer
+  description: A small scheduled service to sync reports too and from Cornerstone
+  archetype: standard-microservice
+- name: Cornerstone_Chris21_Integration
+  description: Packages for integration between Cornerstone and Chris21
+  archetype: standard-microservice
+- name: cszbarIOS11
+  description: Repository cszbarIOS11
+  archetype: standard-microservice
+- name: DBA_Tools
+  description: DBA tools for managing TasWater SQL environments
+- name: digital-portal-eapi-v1
+  description: Repository digital-portal-eapi-v1
+- name: DougsQuickReference
+  description: Dougs Quick Reference
+- name: fme
+  description: FME ETL Workbenches and Projects
+- name: fme-test
+  description: test repo from fme-test server to see how git integration works. See
+    Chris Schulz or Ed Churchill for info.
+- name: GentrackReportingDB_andGTtoGIS
+  description: Gentrack Reporting database. Process to move Gentrack data to GIS.
+- name: GetFileFromHpeTrim
+  description: Script to get a file from hpe trim and deposit somewhere
+  archetype: standard-microservice
+- name: InstallationDataQuality
+  description: Installation Data quality
+- name: JmeterApiTests
+  description: Tests file to load test the mulesoft api
+  archetype: standard-microservice
+- name: JSEA-Python-HTML-Data-Extraction
+  description: Extracting information from HTML documents generated via H2Go
+- name: Maximo
+  description: Maximo Production
+- name: mule_sandbox_email_imap
+  description: mulesoft connection to Exchange mail server. Using IMAP. Proof of method.
+  archetype: sandbox
+  visibility: internal
+- name: Network-IndustrialSwitches
+  description: Repository Network-IndustrialSwitches
+- name: Office365Scripts
+  description: Powershell Script Repository for Office 365 Admin Tasks
+- name: OutSystems---H2GO
+  description: H2GO Source Code
+- name: pi_mulesoft_transforms
+  description: Transforms of pi webapi data
+  team_access:
+  - team: digital-delivery
+    permission: pull
+- name: PRTG_Scripts
+  description: Custom scripts for PRTG Sensors and Notifications
+- name: PS_SPtoSQL
+  description: PowerShell script to take SharePoint lists and send to SQL table
+  archetype: standard-microservice
+- name: PSP2-TradeWasteCalculator
+  description: asp.net app for TradeWaste calculator
+  archetype: standard-microservice
+- name: PSP3-TradeWasteCalculator
+  description: asp.net app
+  archetype: standard-microservice
+- name: PythonDataTesting
+  description: repo for python scripts for testing data structures
+- name: QPC
+  description: This script downloads feedback survey data from purecloud and exports
+    it to a csv file on ssdb17 (datawarehouse)  QPC is the name of the third party
+    provider of our contact centre telephony service.  The telephony service that
+    we use is called Genesys PureCloud.
+- name: Rancid-Clogin-Scripts
+  description: Rancid scripts to be ran on Net 01 server
+- name: RancidAutomationScripts
+  description: Scripts to be ran using Rancid Automation Engine
+- name: sandbox-objects-scheduler
+  description: Discovery on Mulesoft object store and scheduler. Handling errors in
+    scheduled processes.
+  archetype: sandbox
+  team_access:
+  - team: j4rvis
+    permission: pull
+- name: Selenium
+  description: Repository Selenium
+  archetype: standard-microservice
+- name: SELinux
+  description: TasWater SCADA SELinux Policy Sources
+- name: spatial
+  description: Spatial scripts
+  archetype: standard-microservice
+- name: sql-dba
+  description: Repository sql-dba
+  archetype: standard-microservice
+- name: ssis-gentrack-banking
+  description: SSIS project for Gentrack Banking packages interfacing with Mulesoft
+- name: SSIS_Centrelink_ImportResponses
+  description: Centrelink bulk validation process component to import reject and response
+    files from the CCeS portal.
+- name: SSIS_Chris21_ETL
+  description: Chris21 ETL SSIS Packages
+  team_access:
+  - team: operations-team
+    permission: pull
+- name: SSIS_GTV_AgedDebtors_DW
+  description: Import Gentrack daily Aged Debtor reports into data-warehouse.
+- name: SSIS_Metadata_extractor
+  description: Extracts metadata from SSIS packages stored on SQL server
+  archetype: standard-microservice
+- name: ssis_VisTas_COO_V3
+  description: VisTas COO - V3 update to data source
+  archetype: standard-microservice
+- name: SSRS---Apps-Admin
+  description: Repository SSRS---Apps-Admin
+- name: SSRS_Gentrack
+  description: General Gentrack Reporting Services
+- name: SSRS_Gentrack_Pricing
+  description: SSRS reports on Gentrack Plans, Rates, Pricing configuration
+- name: TW-Python-DATABASE
+  description: Examples and code to use Databases with Python
+- name: YARA-Rules
+  description: YARA Rules, Some of these are TLP-Amber so please do not share

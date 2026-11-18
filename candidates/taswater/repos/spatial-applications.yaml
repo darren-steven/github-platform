@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: spatial-applications
+  name: Spatial Applications Domain
+  description: Repositories aligned to the Spatial Applications domain in taswater.
+  organization: taswater
+defaults:
+  archetype: standard-microservice
+  topics:
+  - spatial-applications
+  - taswater
+  team_access:
+  - team: spatial-applications
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - spatial-applications
+repositories:
+- name: GIS_Scripts
+  description: All GIS Python Scripts
+- name: spatial_arcgis_desktop_aim_tools
+  description: Asset Infomation Management Utility Tools for Esri ArcMap and ArcCatalog
+  team_access:
+  - team: spatial-applications
+    permission: push
+- name: spatial_arcgis_server_service_config
+  description: ArcGIS Server 10.x Mapping and Geoprocessing Configuration
+  team_access:
+  - team: spatial-applications
+    permission: push
+- name: spatial_batch_processing_scripts
+  description: ArcGIS Enterprise batch process scripts (Not Current- Under Review)
+- name: spatial_geocortex_config
+  description: Geocortex Configuration
+- name: TW-809-PythonTools
+  description: Python tools for managing Cisco IR809 Routers
+  archetype: shared-library
+  team_access:
+  - team: spatial-applications
+    permission: maintain
+  - team: taswater-networks
+    permission: maintain

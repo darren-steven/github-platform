@@ -1,0 +1,105 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: digital-delivery
+  name: Digital Delivery Domain
+  description: Repositories aligned to the Digital Delivery domain in taswater.
+  organization: taswater
+defaults:
+  archetype: shared-library
+  topics:
+  - digital-delivery
+  - taswater
+  team_access:
+  - team: digital-delivery
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - digital-delivery
+repositories:
+- name: api-address-v1
+  description: Address validation and search. Postal and Property.
+- name: api-banking-v1
+  description: Banking api
+- name: api-gentrack-customer-v1
+  description: Gentrack api for customer entity
+- name: api-inventory-v1
+  description: Repository api-inventory-v1
+- name: api-keep-alive-v1
+  description: Keep Alive API for Tunnel Liveness Checks
+  archetype: standard-microservice
+  team_access:
+  - team: digital-delivery
+    permission: maintain
+  - team: h2go
+    permission: push
+- name: api-locations-v1
+  description: location API
+  archetype: standard-microservice
+  team_access:
+  - team: digital-delivery
+    permission: maintain
+  - team: h2go
+    permission: push
+- name: api-logging-v1
+  description: Mulesoft logging api
+  team_access:
+  - team: digital-delivery
+    permission: maintain
+  - team: h2go
+    permission: push
+- name: api-procurement-v1
+  description: Procurement api
+- name: api-reference-data-v1
+  description: Reference Data API for Retrieving Reference Data Sets
+  archetype: standard-microservice
+  team_access:
+  - team: digital-delivery
+    permission: maintain
+  - team: h2go
+    permission: push
+- name: api-sessions-v1
+  description: Sessions API for handling authentication and session tokens
+  archetype: standard-microservice
+  team_access:
+  - team: digital-delivery
+    permission: maintain
+  - team: h2go
+    permission: push
+- name: api-something-v1
+  description: Repository api-something-v1
+  archetype: standard-microservice
+- name: api-template-v1
+  description: Template api for our CI/CD environment
+- name: api-work-orders-v1
+  description: Work Order API for Operations on Work Orders
+  archetype: standard-microservice
+  team_access:
+  - team: digital-delivery
+    permission: maintain
+  - team: h2go
+    permission: push
+- name: azure-templates
+  description: Repository azure-templates
+  team_access:
+  - team: digital-delivery
+    permission: maintain
+  - team: j4rvis
+    permission: maintain
+  - team: operations-team
+    permission: maintain
+- name: cloudhub-app-bulk-update
+  description: Updates AnyPoint applications with latest patches
+  archetype: standard-microservice
+- name: common-lib
+  description: This is the common library for Jenkins
+- name: jenkins-seed
+  description: Repository jenkins-seed

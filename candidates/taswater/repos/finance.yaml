@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: finance
+  name: Finance Domain
+  description: Repositories aligned to the Finance domain in taswater.
+  organization: taswater
+defaults:
+  archetype: shared-library
+  topics:
+  - finance
+  - taswater
+  team_access:
+  - team: bsa
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - bsa
+repositories:
+- name: finance-mx-sapi-v1
+  description: Maximo system API for sending projects, vendors, gl components to Maximo

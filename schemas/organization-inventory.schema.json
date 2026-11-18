@@ -1,0 +1,315 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://taswater.internal/schemas/github-organization-inventory.schema.json",
+  "title": "GitHub Organization Read-Only Inventory Snapshot Schema",
+  "description": "Validates raw read-only inventory snapshots exported by scripts/export_github_inventory.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "exported_at",
+    "organization",
+    "teams",
+    "repositories"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "enum": [
+        "1.0"
+      ]
+    },
+    "exported_at": {
+      "type": "string"
+    },
+    "organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slug",
+        "name",
+        "description",
+        "billing_email",
+        "default_repository_permission",
+        "members_can_create_public_repositories",
+        "members_can_create_private_repositories",
+        "members_can_create_internal_repositories",
+        "members_can_fork_private_repositories",
+        "web_commit_signoff_required"
+      ],
+      "properties": {
+        "slug": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "billing_email": {
+          "type": "string"
+        },
+        "default_repository_permission": {
+          "type": "string"
+        },
+        "members_can_create_public_repositories": {
+          "type": "boolean"
+        },
+        "members_can_create_private_repositories": {
+          "type": "boolean"
+        },
+        "members_can_create_internal_repositories": {
+          "type": "boolean"
+        },
+        "members_can_fork_private_repositories": {
+          "type": "boolean"
+        },
+        "web_commit_signoff_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "teams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "slug",
+          "name",
+          "description",
+          "privacy"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "privacy": {
+            "type": "string"
+          },
+          "parent_slug": {
+            "type": "string"
+          },
+          "idp_group_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "repositories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "description",
+          "archived",
+          "visibility",
+          "default_branch",
+          "topics",
+          "features",
+          "merge_strategies",
+          "branch_protection",
+          "security",
+          "team_permissions",
+          "environments"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "visibility": {
+            "type": "string"
+          },
+          "default_branch": {
+            "type": "string"
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "features": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "has_issues",
+              "has_wiki",
+              "has_discussions",
+              "has_projects"
+            ],
+            "properties": {
+              "has_issues": {
+                "type": "boolean"
+              },
+              "has_wiki": {
+                "type": "boolean"
+              },
+              "has_discussions": {
+                "type": "boolean"
+              },
+              "has_projects": {
+                "type": "boolean"
+              }
+            }
+          },
+          "merge_strategies": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "allow_squash_merge",
+              "allow_merge_commit",
+              "allow_rebase_merge",
+              "allow_auto_merge",
+              "delete_branch_on_merge"
+            ],
+            "properties": {
+              "allow_squash_merge": {
+                "type": "boolean"
+              },
+              "allow_merge_commit": {
+                "type": "boolean"
+              },
+              "allow_rebase_merge": {
+                "type": "boolean"
+              },
+              "allow_auto_merge": {
+                "type": "boolean"
+              },
+              "delete_branch_on_merge": {
+                "type": "boolean"
+              }
+            }
+          },
+          "branch_protection": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "protected",
+              "min_reviewers",
+              "dismiss_stale_reviews",
+              "require_code_owner_reviews",
+              "require_last_push_approval",
+              "require_conversation_resolution",
+              "require_signed_commits",
+              "require_linear_history",
+              "required_status_checks"
+            ],
+            "properties": {
+              "protected": {
+                "type": "boolean"
+              },
+              "min_reviewers": {
+                "type": "integer"
+              },
+              "dismiss_stale_reviews": {
+                "type": "boolean"
+              },
+              "require_code_owner_reviews": {
+                "type": "boolean"
+              },
+              "require_last_push_approval": {
+                "type": "boolean"
+              },
+              "require_conversation_resolution": {
+                "type": "boolean"
+              },
+              "require_signed_commits": {
+                "type": "boolean"
+              },
+              "require_linear_history": {
+                "type": "boolean"
+              },
+              "required_status_checks": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "security": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "dependabot_alerts",
+              "secret_scanning",
+              "secret_scanning_push_protection"
+            ],
+            "properties": {
+              "dependabot_alerts": {
+                "type": "boolean"
+              },
+              "secret_scanning": {
+                "type": "boolean"
+              },
+              "secret_scanning_push_protection": {
+                "type": "boolean"
+              }
+            }
+          },
+          "team_permissions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "team_slug",
+                "permission"
+              ],
+              "properties": {
+                "team_slug": {
+                  "type": "string"
+                },
+                "permission": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "environments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "require_approval",
+                "approver_teams"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "require_approval": {
+                  "type": "boolean"
+                },
+                "approver_teams": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: general-services
+  name: General Services Domain
+  description: Repositories aligned to the General Services domain in TasWater.
+  organization: TasWater
+defaults:
+  archetype: standard-microservice
+  topics:
+  - general-services
+  - TasWater
+  team_access:
+  - team: TasWater-maintainers
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - TasWater-maintainers
+repositories:
+- name: AzureNamingTool
+  description: The Azure Naming Tool is a .NET 8 Blazor application, with a RESTful
+    API. The UI consists of several pages to allow the configuration and generation
+    of Azure Resource names. The API provides a programmatic interface for the functionality.
+  environments:
+  - name: Development
+    require_approval: false
+- name: azdo-iac
+  description: AzureDevops IaC - AI Optimised
+  archetype: shared-library
+- name: cordova-plugin-inappbrowser
+  description: Mirror of Apache Cordova Plugin inappbrowser
+- name: cszbarIOS11
+  description: Repository cszbarIOS11
+- name: platform-github
+  description: GitGub IaC
+  archetype: shared-library

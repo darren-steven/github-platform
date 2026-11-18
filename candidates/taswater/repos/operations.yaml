@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: operations
+  name: Operations Domain
+  description: Repositories aligned to the Operations domain in taswater.
+  organization: taswater
+defaults:
+  archetype: shared-library
+  topics:
+  - operations
+  - taswater
+  team_access:
+  - team: operations-team
+    permission: push
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - operations-team
+repositories:
+- name: SCOM-ManagementPacks
+  description: Repository for all SCOM Management Pack related development
+- name: TasWater-Scripts
+  description: Repo for general scripts
+  archetype: standard-microservice
+  team_access:
+  - team: operations-team
+    permission: push
+  - team: ops
+    permission: push

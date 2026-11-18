@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: survey
+  name: Survey Domain
+  description: Repositories aligned to the Survey domain in taswater.
+  organization: taswater
+defaults:
+  archetype: shared-library
+  topics:
+  - survey
+  - taswater
+  team_access:
+  - team: bsa
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - bsa
+repositories:
+- name: Survey-ASDS_CADtoGIS_Translator
+  description: FME workbenches, lookup tables, and auxiliary files for the CAD to
+    GIS translator
+- name: Survey-ASDS_V2_Support_Files
+  description: ASDS V2 Support Files
+  archetype: standard-microservice

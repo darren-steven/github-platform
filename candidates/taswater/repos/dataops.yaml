@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: dataops
+  name: Dataops Domain
+  description: Repositories aligned to the Dataops domain in taswater.
+  organization: taswater
+defaults:
+  archetype: shared-library
+  topics:
+  - dataops
+  - taswater
+  team_access:
+  - team: bsa
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - bsa
+repositories:
+- name: dataops-fme
+  description: FME Prod Repo
+- name: dataops-fme-test
+  description: FME Test Repo
+- name: dataops-general
+  description: general folder containing tools, scripts, programs, config files for
+    dataops that does not warrant its own folder - data and analytics team

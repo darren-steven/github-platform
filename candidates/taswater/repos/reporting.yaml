@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: reporting
+  name: Reporting Domain
+  description: Repositories aligned to the Reporting domain in taswater.
+  organization: taswater
+defaults:
+  archetype: standard-microservice
+  topics:
+  - reporting
+  - taswater
+  team_access:
+  - team: reporting
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - reporting
+repositories:
+- name: BI_IRIS_IncidentsHazards
+  description: SSIS packate to import IRIS data into SQL from a flat file
+- name: ExtractExchangeAttachment
+  description: Extracts attachments from emails in an exchange mailbox
+  team_access:
+  - team: bsa
+    permission: pull
+  - team: reporting
+    permission: maintain
+- name: Scripts_BureauOfMetereology
+  description: Scripts to get data from the BOM sites
+- name: SSIS_BureauOfMetereology
+  description: SSIS Packages to extract data from the BOM site and load in to a database

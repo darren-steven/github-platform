@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: github
+  name: Github Domain
+  description: Repositories aligned to the Github domain in taswater.
+  organization: taswater
+defaults:
+  archetype: shared-library
+  topics:
+  - github
+  - taswater
+  team_access:
+  - team: bsa
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - bsa
+repositories:
+- name: github-copilot-iac-example
+  description: A PoC showing how to use CoPilot for github to safely manage a bicep
+    based IaC
+- name: github-security-audit
+  description: GitHub Action to analyze and summarise our GitHib configuration posture

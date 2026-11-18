@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: h2go
+  name: H2Go Domain
+  description: Repositories aligned to the H2Go domain in taswater.
+  organization: taswater
+defaults:
+  archetype: standard-microservice
+  topics:
+  - h2go
+  - taswater
+  team_access:
+  - team: h2go
+    permission: push
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - h2go
+repositories:
+- name: mulesoft
+  description: MuleSoft API development

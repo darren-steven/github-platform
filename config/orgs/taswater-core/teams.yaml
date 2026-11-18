@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=../../../schemas/teams.schema.json
+# =============================================================================
+# GitHub Organization Teams Catalog: taswater-core
+# =============================================================================
+# Centralized registry of GitHub Teams for `taswater-core`.
+# Repository files in `config/orgs/taswater-core/repos/*.yaml` reference these
+# teams by `slug`.
+# =============================================================================
+
+organization: "taswater-core"
+
+teams:
+  - slug: "platform-admins"
+    name: "Platform Admins"
+    description: "Platform engineering administrators responsible for GHEC governance, schemas, policies, and core infrastructure."
+    privacy: "closed"
+    role_tier: "platform-admin"
+    idp_group_id: "11111111-1111-1111-1111-111111111101"
+
+  - slug: "security-auditors"
+    name: "Security Auditors"
+    description: "Cybersecurity and compliance auditors with read access across core repositories and security advisories."
+    privacy: "closed"
+    role_tier: "auditor"
+    idp_group_id: "11111111-1111-1111-1111-111111111102"
+
+  - slug: "platform-maintainers"
+    name: "Platform Maintainers"
+    description: "Technical leads and production deployment approvers for core platform services."
+    privacy: "closed"
+    role_tier: "maintainer"
+    idp_group_id: "11111111-1111-1111-1111-111111111103"
+
+  - slug: "platform-developers"
+    name: "Platform Developers"
+    description: "Day-to-day feature contributors for core platform microservices and shared libraries."
+    privacy: "closed"
+    role_tier: "contributor"
+    parent_team: "platform-maintainers"
+    idp_group_id: "11111111-1111-1111-1111-111111111104"
+
+  - slug: "data-integration-maintainers"
+    name: "Data Integration Maintainers"
+    description: "Technical leads and production approvers for SSIS Manager, ETL pipelines, and integration APIs."
+    privacy: "closed"
+    role_tier: "maintainer"
+    idp_group_id: "11111111-1111-1111-1111-111111111105"
+
+  - slug: "data-integration-developers"
+    name: "Data Integration Developers"
+    description: "Integration engineers developing data pipelines, APIs, and reporting workloads."
+    privacy: "closed"
+    role_tier: "contributor"
+    parent_team: "data-integration-maintainers"
+    idp_group_id: "11111111-1111-1111-1111-111111111106"
+
+  - slug: "ot-scada-maintainers"
+    name: "OT & SCADA Maintainers"
+    description: "Lead engineers governing operational technology and telemetry integration services."
+    privacy: "closed"
+    role_tier: "maintainer"
+    idp_group_id: "11111111-1111-1111-1111-111111111107"
+
+  - slug: "ot-scada-developers"
+    name: "OT & SCADA Developers"
+    description: "Contributors building telemetry ingestion and operational monitoring services."
+    privacy: "closed"
+    role_tier: "contributor"
+    parent_team: "ot-scada-maintainers"
+    idp_group_id: "11111111-1111-1111-1111-111111111108"

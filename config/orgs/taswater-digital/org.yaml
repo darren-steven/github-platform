@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=../../../schemas/org.schema.json
+# =============================================================================
+# GitHub Organization Policy Dials: taswater-digital (Tier 2)
+# =============================================================================
+
+organization:
+  slug: "taswater-digital"
+  name: "TasWater Digital & Customer Channels"
+  description: "Customer portal, digital self-service, mobile field apps, and billing integration repositories."
+  billing_email: "digital-engineering@taswater.com.au"
+  default_archetype: "standard-microservice"
+
+security_dials:
+  members_can_create_private_repositories: false
+  members_can_create_internal_repositories: false
+  members_can_fork_private_repositories: false
+  web_commit_signoff_required: false
+  dependabot_alerts_enabled_for_new_repositories: true
+  secret_scanning_enabled_for_new_repositories: true
+  secret_scanning_push_protection_enabled_for_new_repositories: true
+
+actions_dials:
+  allowed_actions: "selected"
+  allow_github_owned_actions: true
+  allow_verified_creator_actions: true
+  default_workflow_permissions: "read"
+  can_approve_pull_request_reviews: false
+  sha_pinning_required: true
+  default_job_timeout_minutes: 45
+
+repository_defaults:
+  default_branch: "main"
+  min_reviewers: 2
+  dismiss_stale_reviews: true
+  require_code_owner_reviews: true
+  require_last_push_approval: true
+  require_conversation_resolution: true
+  allowed_merge_types:
+    squash: true
+    merge_commit: false
+    rebase: false
+    auto_merge: true
+    delete_branch_on_merge: true
+
+runner_groups:
+  - name: "taswater-digital-runners"
+    visibility: "selected"
+    allow_public_repositories: false

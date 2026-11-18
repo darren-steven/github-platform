@@ -1,76 +1,48 @@
-# yaml-language-server: $schema=../../../../schemas/project.schema.json
-# Reference Template: Standard Microservice Project
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+# =============================================================================
+# Example Domain Repository Configuration (`config/orgs/<org>/repos/<domain>.yaml`)
+# =============================================================================
 
-project:
-  key: "payments-api"
-  name: "Payments API"
-  description: "Core payments processing microservice and asynchronous settlement workers."
+domain:
+  key: "example-domain"
+  name: "Example Engineering Domain"
+  description: "Reference domain file demonstrating shared defaults and concise per-repository definitions."
+  organization: "taswater-core"
+
+defaults:
   archetype: "standard-microservice"
-  create_default_repository: false
-
-  # Feature toggles (visibility is locked to 'private' by Tier 1 baseline)
-  features:
-    boards: "enabled"
-    repositories: "enabled"
-    pipelines: "enabled"
-    testplans: "disabled"
-    artifacts: "enabled"
-
-  # Project-level bounded dials (optional overrides within Tier 2 bounds)
-  branch_policy_dials:
-    min_reviewers: 2 # Allowed: 2..5
-    reset_votes_on_new_push: true
-    require_work_item_linking: true
-    require_comment_resolution: true
-    build_validation_expiry_hours: 24 # Allowed: 12..72
-    allowed_merge_types:
-      squash: true
-      no_fast_forward: true
-      rebase: false
-      rebase_merge: false
-
-  teams:
-    - name: "Payments Developers"
-      description: "Core engineering team for Payments API"
-      role: "contributor"
-      members:
-        - "payments-devs@taswater.com"
-    - name: "Payments Leads"
-      description: "Tech leads and release approvers"
-      role: "lead"
-      members:
-        - "payments-leads@taswater.com"
-
-  repositories:
-    - name: "payments-service"
-      default_branch: "refs/heads/main"
-      build_validation_pipeline_name: "payments-service-ci"
-    - name: "payments-contracts"
-      default_branch: "refs/heads/main"
-
+  topics:
+    - "example-domain"
+    - "taswater-core"
+  team_access:
+    - team: "platform-developers"
+      permission: "push"
+    - team: "platform-maintainers"
+      permission: "maintain"
+    - team: "security-auditors"
+      permission: "pull"
   environments:
     - name: "dev"
-      description: "Development environment"
+      description: "Development integration environment"
       require_approval: false
     - name: "staging"
-      description: "Pre-production staging environment"
+      description: "Staging verification environment"
       require_approval: false
     - name: "prod"
       description: "Production environment"
       require_approval: true
-      approver_team: "Payments Leads"
+      approver_teams:
+        - "platform-maintainers"
 
-  variable_groups:
-    - name: "payments-nonprod-config"
-      description: "Non-sensitive configuration for dev/staging"
-      variables:
-        LOG_LEVEL: "Information"
-        ASPNETCORE_ENVIRONMENT: "Staging"
-    - name: "payments-prod-secrets"
-      description: "Key Vault linked secrets for production"
-      key_vault:
-        name: "kv-taswater-payments-prod"
-        service_connection_name: "sc-azure-payments-prod"
-        secret_names:
-          - "SqlConnectionString"
-          - "StripeWebhookSigningKey"
+repositories:
+  - name: "example-domain-api"
+    description: "Primary REST API for the Example Engineering Domain."
+    required_status_checks:
+      - "ci / build-and-test"
+    codeowners_teams:
+      - path: "/infra/*"
+        teams:
+          - "platform-maintainers"
+
+  - name: "example-domain-worker"
+    description: "Asynchronous background worker for the Example Engineering Domain."

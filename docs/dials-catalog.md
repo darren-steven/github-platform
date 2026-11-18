@@ -1,64 +1,67 @@
-# Azure DevOps Organization Baseline & Dials Catalog
+# GitHub Enterprise Cloud Baseline & Dials Catalog
 
-This catalog documents every governance control managed by `AzDo-IaC`, classified into:
+This catalog documents every governance control managed in `config/`, classified into:
 
-- **Tier 1 — Immutable Baselines**: Locked in the OpenTofu engine (`modules/`) and OPA policies (`policies/`). Cannot be overridden via YAML configuration.
-- **Tier 2 — Bounded Dials**: Exposed in `config/*.yaml` and constrained by JSON Schemas (`schemas/*.schema.json`) and OpenTofu `validation {}` blocks.
+- **Tier 1 — Immutable Baselines**: Locked by JSON Schemas (`schemas/`) and OPA/Python policies (`policies/`, `scripts/`). Cannot be weakened via YAML configuration.
+- **Tier 2 — Bounded Dials**: Exposed in `config/**/*.yaml` and constrained within safe security bounds.
+- **Tier 3 — Self-Service Catalogs**: Teams (`teams.yaml`) and domain-grouped repositories (`repos/<domain>.yaml`).
 
 ---
 
-## 1. Tier 1: Immutable Baselines (Locked in Code)
+## 1. Tier 1: Immutable Baselines (Locked in Schemas & Policies)
 
-| Domain | Control / Invariant | Enforced Value | Enforcing Module / Policy | Security Rationale |
+| Domain | Control / Invariant | Enforced Value | Enforcing Schema / Policy | Security Rationale |
 | :--- | :--- | :--- | :--- | :--- |
-| **Organization Security** | `Policy.AllowOrgPublicProjects` | `false` | `modules/org-settings-api-bridge` | Prevents accidental public exposure of source code, work items, or pipelines. |
-| **Organization Security** | `Policy.DisallowAnonymousAccess` | `true` | `modules/org-settings-api-bridge` | Blocks unauthenticated read access across all organization endpoints. |
-| **Organization Security** | `Policy.EnforceAADConditionalAccess` | `true` | `modules/org-settings-api-bridge` | Enforces Entra ID Conditional Access policies (MFA, compliant device, IP bounds) on web and REST/Git flows. |
-| **Pipelines** | `DisableClassicBuildPipelines` & `DisableClassicReleasePipelines` | `true` | `modules/org-settings-api-bridge` | Mandates version-controlled, PR-reviewed YAML pipelines; blocks click-ops pipeline definitions. |
-| **Pipelines** | `status_badges_are_private` | `true` | `modules/project-archetype` | Requires authentication to view pipeline status badges. |
-| **Projects** | `visibility` & `version_control` | `"private"`, `"Git"` | `modules/project-archetype` | Every project is private and uses Git (TFVC disabled). |
-| **Branch Protection** | `submitter_can_vote` & `last_pusher_cannot_approve` | `false`, `true` | `modules/project-archetype/branch_policies.tf` | Enforces true four-eyes review; PR authors and the most recent pusher cannot approve their own changes. |
-| **Branch Protection** | `ForcePush` & `EditPolicies` permissions | `"deny"` | `modules/security-namespaces` | Denies force-push and manual branch policy edits even for Project Leads; branch policies are managed solely by IaC. |
-| **Deployments** | Production Environment Approval (`prod` / `production`) | `require_approval = true`, `requester_can_approve = false` | `policies/project_guardrails.rego` & `modules/project-archetype` | Requires independent approval from a designated lead team before production deployment. |
-| **Secrets Management** | Plain-text secrets in `variable_groups` | Blocked (`PROJ-POLICY-007`) | `policies/project_guardrails.rego` | Prevents credentials, tokens, or connection strings from being committed to Git; mandates Azure Key Vault linkage. |
+| **Enterprise Security** | `enforce_saml_sso` | `true` | `enterprise.schema.json` & `ENT-BASELINE-001` | Mandates Entra ID SAML/OIDC authentication across the enterprise. |
+| **Enterprise Security** | `members_can_create_public_repositories` | `false` | `enterprise.schema.json` & `ENT-BASELINE-002` | Prevents accidental public exposure of intellectual property or source code. |
+| **Repository Visibility** | `visibility` | `"private"` or `"internal"` | `domain-repos.schema.json` | Public repositories are blocked at the schema level across all archetypes. |
+| **Repository Access** | `team_access[].permission` | `"pull"`, `"triage"`, `"push"`, `"maintain"` | `domain-repos.schema.json` | Blocks repository `"admin"` permissions for teams so branch rulesets and security settings remain strictly governed by IaC. |
+| **Branch Protection** | `dismiss_stale_reviews` & `require_last_push_approval` | `true`, `true` | `enterprise.schema.json` & `domain-repos.schema.json` | Enforces true four-eyes review; pushing new commits resets approvals and the last pusher cannot self-approve. |
+| **GitHub Actions** | `default_workflow_permissions` & `can_approve_pull_request_reviews` | `"read"`, `false` | `org.schema.json` & `ORG-BASELINE-006/007` | Scopes `GITHUB_TOKEN` to read-only by default and prevents workflows from approving pull requests. |
+| **Advanced Security** | `secret_scanning`, `secret_scanning_push_protection`, `dependabot_alerts` | `true` (non-sandbox) | `repo_guardrails.rego` (`REPO-POLICY-003`) | Blocks credential leaks at push time and tracks vulnerable dependencies on all production/shared archetypes. |
+| **Deployments** | Production Environment Approval (`prod` / `production`) | `require_approval: true` + valid `approver_teams` | `repo_guardrails.rego` (`REPO-POLICY-004/005`) | Requires approval from a designated maintainer team before production deployment. |
+| **Secrets Management** | Plain-text secrets in `environment_variables` | Blocked (`REPO-POLICY-007`) | `repo_guardrails.rego` | Prevents tokens, passwords, or keys from being committed in YAML; mandates GitHub Encrypted Secrets / Azure Key Vault OIDC. |
 
 ---
 
-## 2. Tier 2: Exposed Organization Dials (`config/org.yaml`)
+## 2. Tier 2: Exposed Organization Dials (`config/orgs/<org>/org.yaml`)
 
-> **Approval Requirement**: Changes to `config/org.yaml` affect the entire organization and require `@org/azdo-platform-admins` review.
+> **Approval Requirement**: Changes to `config/orgs/<org>/org.yaml` affect the entire GitHub Organization and require Platform Admin review.
 
 | YAML Path | Type | Default | Allowed Bounds | Description & Blast Radius |
 | :--- | :--- | :--- | :--- | :--- |
-| `organization.default_process_template` | `string` | `"Agile"` | `"Agile"`, `"Scrum"`, `"CMMI"`, `"Basic"` | Default work item process template for newly onboarded projects. |
-| `security_dials.allow_team_admins_invite` | `boolean` | `false` | `true` / `false` | Whether Project and Team Admins can invite new users into the AzDO organization. |
-| `security_dials.ssh_authentication_enabled` | `boolean` | `true` | `true` / `false` | Whether Git over SSH is enabled across the organization. |
-| `security_dials.disallow_third_party_oauth` | `boolean` | `true` | `true` / `false` | Blocks legacy third-party OAuth app access (Entra ID OIDC remains enabled). |
-| `pipeline_dials.default_job_timeout_minutes` | `integer` | `60` | `15` .. `180` | Default pipeline job timeout in minutes. |
-| `pipeline_dials.enforce_settable_var_at_queue` | `boolean` | `true` | `true` / `false` | Restricts queue-time variables to those explicitly marked settable in the pipeline definition. |
-| `pipeline_dials.enforce_job_auth_scope_to_project` | `boolean` | `true` | `true` / `false` | Scopes build job authorization tokens to the current project rather than the whole collection. |
-| `pipeline_dials.enforce_referenced_repo_scoped_token` | `boolean` | `true` | `true` / `false` | Restricts YAML pipeline tokens to repositories explicitly listed in `resources.repositories`. |
-| `repository_defaults.min_reviewers` | `integer` | `2` | `2` .. `5` | Organization-wide default minimum reviewers on default branch PRs. |
-| `repository_defaults.reset_votes_on_new_push` | `boolean` | `true` | `true` / `false` | Resets reviewer approvals when new commits are pushed to a PR. |
-| `repository_defaults.require_work_item_linking` | `boolean` | `true` | `true` / `false` | Requires every PR to link at least one work item. |
-| `repository_defaults.require_comment_resolution` | `boolean` | `true` | `true` / `false` | Requires all PR review threads to be resolved before merge. |
-| `repository_defaults.build_validation_expiry_hours` | `integer` | `24` | `12` .. `72` | Hours before a PR build validation expires when the target branch changes. |
-| `repository_defaults.allowed_merge_types.*` | `object` | `squash: true`, `no_fast_forward: true` | At least 1 `true` | Controls which merge strategies (`squash`, `no_fast_forward`, `rebase`, `rebase_merge`) are permitted. |
+| `organization.default_archetype` | `string` | `"standard-microservice"` | `"standard-microservice"`, `"regulated-workload"`, `"shared-library"`, `"sandbox"` | Default archetype for repositories in the organization. |
+| `security_dials.members_can_create_private_repositories` | `boolean` | `false` | `true` / `false` | Whether members can create unmanaged private repos outside IaC. |
+| `security_dials.members_can_create_internal_repositories` | `boolean` | `false` | `true` / `false` | Whether members can create unmanaged internal repos outside IaC. |
+| `security_dials.members_can_fork_private_repositories` | `boolean` | `false` | `true` / `false` | Whether members can fork private/internal repositories. |
+| `security_dials.web_commit_signoff_required` | `boolean` | `false` | `true` / `false` | Requires DCO sign-off on web-based commits. |
+| `actions_dials.allowed_actions` | `string` | `"selected"` | `"selected"`, `"local_only"` | Restricts reusable Actions to verified/selected patterns or local-only. |
+| `actions_dials.sha_pinning_required` | `boolean` | `true` | `true` / `false` | Requires third-party GitHub Actions to be pinned to a full commit SHA. |
+| `actions_dials.default_job_timeout_minutes` | `integer` | `60` | `15` .. `180` | Default workflow job timeout in minutes (`ORG-BASELINE-004/005`). |
+| `repository_defaults.min_reviewers` | `integer` | `2` | `2` .. `5` | Organization default minimum approving reviews on `main` PRs. |
+| `repository_defaults.allowed_merge_types.*` | `object` | `squash: true`, `merge_commit: true` | At least 1 merge strategy `true` | Controls default allowed PR merge methods (`squash`, `merge_commit`, `rebase`, `auto_merge`, `delete_branch_on_merge`). |
 
 ---
 
-## 3. Tier 2 & Tier 3: Project Archetypes & Dials (`config/projects/<key>.yaml`)
+## 3. Tier 2 & Tier 3: Repository Archetypes (`config/enterprise.yaml` & `config/orgs/<org>/repos/<domain>.yaml`)
 
-> **Approval Requirement**: Changes to `config/projects/*.yaml` are scoped to a single project and can be approved by `@org/azdo-maintainers`.
+> **Approval Requirement**: Changes to `config/orgs/<org>/repos/<domain>.yaml` are scoped to a domain/repository and can be approved by Maintainers.
 
-| Archetype | `min_reviewers` Bound | `build_validation_expiry_hours` Bound | Intended Use Case |
+| Archetype | Default Visibility | `min_reviewers` Bound | `require_signed_commits` | `code_scanning_default_setup` | Intended Use Case |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `standard-microservice` | `private` | `2` .. `5` (Default: `2`) | `false` (Optional) | `true` | Standard engineering microservices, APIs, workers, and web apps. |
+| `regulated-workload` | `private` | **`3` .. `5`** (Enforced >= 3) | **`true`** (Enforced) | `true` | High-compliance, identity, financial, payment, or OT/SCADA workloads. |
+| `shared-library` | `internal` | `2` .. `5` (Default: `2`) | `false` (Optional) | `true` | Inner-source SDKs, UI design systems, and shared libraries visible across both enterprise orgs. |
+| `sandbox` | `private` | `2` .. `5` (Default: `2`) | `false` | `false` | Non-production proofs of concept and prototypes isolated from production environments. |
+
+### Per-Repository & Domain Dials (`config/orgs/<org>/repos/<domain>.yaml`)
+
+| YAML Path | Type | Allowed Bounds | Description |
 | :--- | :--- | :--- | :--- |
-| `standard-microservice` | `2` .. `5` (Default: `2`) | `12` .. `72` (Default: `24`) | Standard engineering services, libraries, and internal applications. |
-| `regulated-workload` | **`3` .. `5`** (Enforced >= 3) | **`12`** (Enforced <= 12) | PCI/SOX/regulated services requiring stricter quorum and fresher build validation. |
-| `sandbox` | `2` .. `5` (Default: `2`) | `12` .. `72` (Default: `48`) | Non-production proofs of concept isolated from production service connections. |
-
-### Project-Level Repository Dials (`config/projects/<key>.yaml`)
-
-| YAML Path | Type | Default | Allowed Bounds | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `project.create_default_repository` | `boolean` | `false` | `true` / `false` | When `false` (default), removes the unmanaged `<Project Name>` repository that Azure DevOps auto-creates. When `true`, creates and governs the `<Project Name>` repository with full branch protection policies and team permissions just like any other repository. |
+| `defaults.archetype` / `repositories[].archetype` | `string` | `"standard-microservice"`, `"regulated-workload"`, `"shared-library"`, `"sandbox"` | Selects the baseline governance archetype. |
+| `defaults.team_access` / `repositories[].team_access` | `array` | `permission` in `["pull", "triage", "push", "maintain"]` | Maps organization team slugs (from `teams.yaml`) to repository permissions. |
+| `repositories[].branch_protection.min_reviewers` | `integer` | `2` .. `5` (`3` .. `5` for `regulated-workload`) | Overrides required approving reviewer count on `main`. |
+| `repositories[].merge_strategies.*` | `object` | At least 1 of `allow_squash_merge`, `allow_merge_commit`, `allow_rebase_merge` = `true` | Overrides allowed PR merge methods for a specific repository. |
+| `repositories[].required_status_checks` | `array<string>` | Non-empty strings | CI status check contexts required to pass before merging to `main`. |
+| `repositories[].codeowners_teams` | `array` | Valid path (`/...`) + team slugs in `teams.yaml` | Path-scoped CODEOWNERS team review rules. |
+| `defaults.environments` / `repositories[].environments` | `array` | `prod` requires `require_approval: true` & `approver_teams` | Configures deployment environments (`dev`, `staging`, `prod`) and required reviewer teams. |

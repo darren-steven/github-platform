@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate YAML configuration against schemas and project policy guardrails."""
+"""Validate GitHub Enterprise Cloud YAML configuration against schemas and policy guardrails."""
 
 import glob
 import json
@@ -11,7 +11,7 @@ from pathlib import Path
 try:
     import yaml
 except ImportError:
-    print("ERROR: python3-yaml (PyYAML) is required to parse config/*.yaml", file=sys.stderr)
+    print("ERROR: python3-yaml (PyYAML) is required to parse config/**/*.yaml", file=sys.stderr)
     sys.exit(1)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -19,6 +19,20 @@ os.chdir(REPO_ROOT)
 
 errors = []
 warnings = []
+
+SECRET_KEYWORDS = [
+    "SECRET",
+    "PASSWORD",
+    "PASSWD",
+    "TOKEN",
+    "API_KEY",
+    "APIKEY",
+    "PRIVATE_KEY",
+    "CONNECTION_STRING",
+    "CONN_STR",
+    "CLIENT_SECRET",
+    "PAT",
+]
 
 
 def load_json(path):
@@ -73,6 +87,9 @@ def validate_against_schema(data, schema, path_prefix):
     elif schema_type == "boolean":
         if not isinstance(data, bool):
             errors.append(f"{path_prefix}: expected boolean, got {data!r}")
+            return
+        if "enum" in schema and data not in schema["enum"]:
+            errors.append(f"{path_prefix}: boolean value '{data}' must be {schema['enum']}")
     elif schema_type == "string":
         if not isinstance(data, str):
             errors.append(f"{path_prefix}: expected string, got {data!r}")
@@ -87,109 +104,247 @@ def validate_against_schema(data, schema, path_prefix):
             errors.append(f"{path_prefix}: value '{data}' does not match required pattern '{schema['pattern']}'")
 
 
+def validate_environments(envs, team_slugs, file_label, scope_label):
+    for env in envs or []:
+        if not isinstance(env, dict):
+            continue
+        ename = env.get("name", "")
+        req_app = env.get("require_approval", False)
+        approvers = env.get("approver_teams") or []
+        if ename.lower() in {"prod", "production", "prd"} and req_app is not True:
+            errors.append(
+                f"[REPO-POLICY-004] {file_label} ({scope_label}): production environment '{ename}' must set require_approval: true"
+            )
+        if req_app is True and len(approvers) == 0:
+            errors.append(
+                f"[REPO-POLICY-005] {file_label} ({scope_label}): environment '{ename}' requires approval and must specify at least one team in approver_teams"
+            )
+        for team_slug in approvers:
+            if team_slug not in team_slugs:
+                errors.append(
+                    f"[REPO-TEAM-REF] {file_label} ({scope_label}): environment '{ename}' approver_teams references unknown team slug '{team_slug}'"
+                )
+
+
 def main():
+    enterprise_schema = load_json("schemas/enterprise.schema.json")
     org_schema = load_json("schemas/org.schema.json")
-    org_data = load_yaml("config/org.yaml")
-    validate_against_schema(org_data, org_schema, "config/org.yaml")
+    teams_schema = load_json("schemas/teams.schema.json")
+    domain_repos_schema = load_json("schemas/domain-repos.schema.json")
 
-    if isinstance(org_data, dict) and "repository_defaults" in org_data:
-        merges = org_data["repository_defaults"].get("allowed_merge_types", {})
-        if not any(merges.get(k) for k in ("squash", "no_fast_forward", "rebase", "rebase_merge")):
-            errors.append("[ORG-BASELINE-003] config/org.yaml: repository_defaults.allowed_merge_types must enable at least one merge strategy.")
-    for pool in org_data.get("agent_pools", []):
-        if pool.get("auto_provision") is True:
-            warnings.append(f"[ORG-BASELINE-WARN-001] config/org.yaml: agent pool '{pool.get('name')}' has auto_provision=true.")
+    # 1. Validate config/enterprise.yaml
+    ent_path = "config/enterprise.yaml"
+    if not os.path.isfile(ent_path):
+        errors.append("Missing required enterprise configuration file: config/enterprise.yaml")
+        return 1
 
-    groups_schema = load_json("schemas/groups.schema.json")
-    groups_data = load_yaml("config/groups.yaml")
-    validate_against_schema(groups_data, groups_schema, "config/groups.yaml")
+    ent_data = load_yaml(ent_path)
+    validate_against_schema(ent_data, enterprise_schema, ent_path)
 
-    identity_schema = load_json("schemas/identity-bootstrap.schema.json")
-    identity_data = load_yaml("config/identity-bootstrap.yaml")
-    validate_against_schema(identity_data, identity_schema, "config/identity-bootstrap.yaml")
-    if isinstance(identity_data, dict):
-        plan_group = identity_data.get("plan_group")
-        if not isinstance(plan_group, dict):
-            plan_group = {}
-        apply_group = identity_data.get("apply_group")
-        if not isinstance(apply_group, dict):
-            apply_group = {}
-        if (
-            "display_name" in plan_group
-            and "display_name" in apply_group
-            and plan_group["display_name"] == apply_group["display_name"]
-        ):
-            errors.append("config/identity-bootstrap.yaml: plan_group and apply_group must have different display_name values")
-        for field in ("member_object_ids", "owner_object_ids"):
-            values = plan_group.get(field, [])
-            if isinstance(values, list) and all(isinstance(value, str) for value in values) and len(values) != len(set(values)):
-                errors.append(f"config/identity-bootstrap.yaml: plan_group.{field} must not contain duplicate object IDs")
-        eligible_members = apply_group.get("eligible_member_object_ids", [])
-        if (
-            isinstance(eligible_members, list)
-            and all(isinstance(value, str) for value in eligible_members)
-            and len(eligible_members) != len(set(eligible_members))
-        ):
-            errors.append("config/identity-bootstrap.yaml: apply_group.eligible_member_object_ids must not contain duplicate object IDs")
-        project_names = identity_data.get("plan_project_names", [])
-        if (
-            isinstance(project_names, list)
-            and all(isinstance(value, str) for value in project_names)
-            and len(project_names) != len(set(project_names))
-        ):
-            errors.append("config/identity-bootstrap.yaml: plan_project_names must not contain duplicate project names")
+    archetypes = (ent_data or {}).get("archetypes", {})
+    for arch_name, arch in archetypes.items():
+        if not isinstance(arch, dict):
+            continue
+        bp = arch.get("branch_protection", {})
+        ms = arch.get("merge_strategies", {})
+        if arch_name == "regulated-workload":
+            if bp.get("min_reviewers", 0) < 3:
+                errors.append(
+                    f"[ENT-BASELINE-004] {ent_path}: archetype 'regulated-workload' must enforce min_reviewers >= 3"
+                )
+            if bp.get("require_signed_commits") is not True:
+                errors.append(
+                    f"[ENT-BASELINE-005] {ent_path}: archetype 'regulated-workload' must enforce require_signed_commits: true"
+                )
+        if not any(ms.get(k) for k in ("allow_squash_merge", "allow_merge_commit", "allow_rebase_merge")):
+            errors.append(
+                f"[ENT-BASELINE-006] {ent_path}: archetype '{arch_name}' must enable at least one merge strategy"
+            )
 
-    project_schema = load_json("schemas/project.schema.json")
-    secret_keywords = ["SECRET", "PASSWORD", "PASSWD", "TOKEN", "API_KEY", "APIKEY", "PRIVATE_KEY", "CONNECTION_STRING", "CONN_STR", "CLIENT_SECRET", "PAT"]
+    managed_orgs = (ent_data or {}).get("enterprise", {}).get("managed_organizations", [])
+    discovered_org_dirs = sorted(
+        os.path.basename(p) for p in glob.glob("config/orgs/*") if os.path.isdir(p)
+    )
 
-    project_files = sorted(glob.glob("config/projects/*.yaml"))
-    for pf in project_files:
-        pdata = load_yaml(pf)
-        validate_against_schema(pdata, project_schema, pf)
-        proj = (pdata or {}).get("project", {})
-        pkey = proj.get("key", "<unknown>")
-        expected_filename = f"{pkey}.yaml"
-        if os.path.basename(pf) != expected_filename:
-            errors.append(f"[PROJ-KEY-MISMATCH] {pf}: project.key '{pkey}' must match filename '{ os.path.basename(pf) }'")
+    for org_slug in managed_orgs:
+        if org_slug not in discovered_org_dirs:
+            errors.append(
+                f"[ENT-ORG-MISSING] {ent_path}: managed organization '{org_slug}' is missing directory config/orgs/{org_slug}/"
+            )
+    for org_dir in discovered_org_dirs:
+        if org_dir not in managed_orgs:
+            errors.append(
+                f"[ENT-ORG-UNREGISTERED] config/orgs/{org_dir}: organization directory is not registered in config/enterprise.yaml managed_organizations"
+            )
 
-        archetype = proj.get("archetype")
-        dials = proj.get("branch_policy_dials", {})
-        if archetype == "regulated-workload":
-            min_rev = dials.get("min_reviewers", 2)
-            if min_rev < 3:
-                errors.append(f"[PROJ-POLICY-001] {pf}: regulated-workload requires branch_policy_dials.min_reviewers >= 3 (got {min_rev})")
-            expiry = dials.get("build_validation_expiry_hours", 24)
-            if expiry > 12:
-                errors.append(f"[PROJ-POLICY-002] {pf}: regulated-workload requires build_validation_expiry_hours <= 12 (got {expiry})")
+    total_teams = 0
+    total_domains = 0
+    total_repos = 0
 
-        team_names = {t.get("name") for t in proj.get("teams", []) if isinstance(t, dict)}
-        for env in proj.get("environments", []):
-            ename = env.get("name", "")
-            req_app = env.get("require_approval", False)
-            approver = env.get("approver_team", "")
-            if ename.lower() in {"prod", "production", "prd"} and req_app is not True:
-                errors.append(f"[PROJ-POLICY-003] {pf}: production environment '{ename}' must set require_approval: true")
-            if req_app is True and not approver:
-                errors.append(f"[PROJ-POLICY-004] {pf}: environment '{ename}' requires approval and must set approver_team")
-            if approver and approver not in team_names:
-                errors.append(f"[PROJ-POLICY-005] {pf}: environment '{ename}' references unknown approver_team '{approver}'")
+    # 2. Validate each Organization (org.yaml, teams.yaml, repos/*.yaml)
+    for org_slug in discovered_org_dirs:
+        org_dir_path = f"config/orgs/{org_slug}"
+        org_yaml_path = f"{org_dir_path}/org.yaml"
+        teams_yaml_path = f"{org_dir_path}/teams.yaml"
 
-        for repo in proj.get("repositories", []):
-            for pr in repo.get("path_reviewers", []):
-                tname = pr.get("team_name", "")
-                if tname not in team_names:
-                    errors.append(f"[PROJ-POLICY-006] {pf}: repo '{repo.get('name')}' path_reviewers references unknown team '{tname}'")
+        if not os.path.isfile(org_yaml_path):
+            errors.append(f"Missing required organization file: {org_yaml_path}")
+            continue
+        if not os.path.isfile(teams_yaml_path):
+            errors.append(f"Missing required teams catalog file: {teams_yaml_path}")
+            continue
 
-        if (proj.get("features") or {}).get("repositories") == "enabled":
-            if not proj.get("create_default_repository", False) and len(proj.get("repositories") or []) == 0:
-                errors.append(f"[PROJ-POLICY-008] {pf}: project with repositories enabled must either declare at least one repo in 'repositories' or set 'create_default_repository: true'")
+        org_data = load_yaml(org_yaml_path)
+        validate_against_schema(org_data, org_schema, org_yaml_path)
 
-        for vg in proj.get("variable_groups", []):
-            for vkey in (vg.get("variables") or {}).keys():
-                ukey = vkey.upper()
-                for kw in secret_keywords:
-                    if kw in ukey:
-                        errors.append(f"[PROJ-POLICY-007] {pf}: variable group '{vg.get('name')}' contains plain-text variable '{vkey}' matching secret keyword '{kw}'. Use a key_vault block instead.")
+        if isinstance(org_data, dict):
+            declared_slug = (org_data.get("organization") or {}).get("slug")
+            if declared_slug != org_slug:
+                errors.append(
+                    f"[ORG-SLUG-MISMATCH] {org_yaml_path}: organization.slug '{declared_slug}' must match directory name '{org_slug}'"
+                )
+            merges = (org_data.get("repository_defaults") or {}).get("allowed_merge_types", {})
+            if not any(merges.get(k) for k in ("squash", "merge_commit", "rebase")):
+                errors.append(
+                    f"[ORG-BASELINE-003] {org_yaml_path}: repository_defaults.allowed_merge_types must enable at least one merge strategy."
+                )
+            for rg in org_data.get("runner_groups", []):
+                if rg.get("visibility") == "all":
+                    warnings.append(
+                        f"[ORG-BASELINE-WARN-001] {org_yaml_path}: runner group '{rg.get('name')}' has visibility='all'."
+                    )
+
+        # Validate teams.yaml
+        teams_data = load_yaml(teams_yaml_path)
+        validate_against_schema(teams_data, teams_schema, teams_yaml_path)
+
+        team_slugs = set()
+        teams_list = (teams_data or {}).get("teams", []) if isinstance(teams_data, dict) else []
+        if isinstance(teams_data, dict) and teams_data.get("organization") != org_slug:
+            errors.append(
+                f"[TEAMS-ORG-MISMATCH] {teams_yaml_path}: organization '{teams_data.get('organization')}' must match directory '{org_slug}'"
+            )
+
+        for t in teams_list:
+            if not isinstance(t, dict):
+                continue
+            tslug = t.get("slug")
+            if tslug in team_slugs:
+                errors.append(f"[TEAMS-DUPLICATE] {teams_yaml_path}: duplicate team slug '{tslug}'")
+            team_slugs.add(tslug)
+            total_teams += 1
+
+        for t in teams_list:
+            if not isinstance(t, dict):
+                continue
+            parent = t.get("parent_team")
+            if parent:
+                if parent == t.get("slug"):
+                    errors.append(f"[TEAMS-SELF-PARENT] {teams_yaml_path}: team '{parent}' cannot be its own parent_team")
+                elif parent not in team_slugs:
+                    errors.append(
+                        f"[TEAMS-UNKNOWN-PARENT] {teams_yaml_path}: team '{t.get('slug')}' references unknown parent_team '{parent}'"
+                    )
+
+        # Validate domain repository files in config/orgs/<org>/repos/*.yaml
+        domain_files = sorted(glob.glob(f"{org_dir_path}/repos/*.yaml"))
+        if not domain_files:
+            errors.append(f"No domain repository files found in {org_dir_path}/repos/*.yaml")
+
+        seen_repos_in_org = {}
+        for df in domain_files:
+            total_domains += 1
+            ddata = load_yaml(df)
+            validate_against_schema(ddata, domain_repos_schema, df)
+            if not isinstance(ddata, dict):
+                continue
+
+            domain_meta = ddata.get("domain") or {}
+            dkey = domain_meta.get("key", "<unknown>")
+            expected_filename = f"{dkey}.yaml"
+            if os.path.basename(df) != expected_filename:
+                errors.append(
+                    f"[DOMAIN-KEY-MISMATCH] {df}: domain.key '{dkey}' must match filename '{os.path.basename(df)}'"
+                )
+            if domain_meta.get("organization") != org_slug:
+                errors.append(
+                    f"[DOMAIN-ORG-MISMATCH] {df}: domain.organization '{domain_meta.get('organization')}' must match '{org_slug}'"
+                )
+
+            defaults = ddata.get("defaults") or {}
+            default_arch = defaults.get("archetype", "standard-microservice")
+
+            for ta in defaults.get("team_access") or []:
+                if isinstance(ta, dict) and ta.get("team") not in team_slugs:
+                    errors.append(
+                        f"[REPO-TEAM-REF] {df} (defaults.team_access): references unknown team slug '{ta.get('team')}' (not in {teams_yaml_path})"
+                    )
+
+            validate_environments(defaults.get("environments"), team_slugs, df, "defaults.environments")
+
+            for repo in ddata.get("repositories") or []:
+                if not isinstance(repo, dict):
+                    continue
+                total_repos += 1
+                rname = repo.get("name", "<unknown>")
+                if rname in seen_repos_in_org:
+                    errors.append(
+                        f"[REPO-DUPLICATE] {df}: repository '{rname}' is already defined in {seen_repos_in_org[rname]} for organization '{org_slug}'"
+                    )
+                else:
+                    seen_repos_in_org[rname] = df
+
+                eff_arch = repo.get("archetype", default_arch)
+                bp = repo.get("branch_protection") or {}
+                if eff_arch == "regulated-workload":
+                    min_rev = bp.get("min_reviewers", 3)
+                    if min_rev < 3:
+                        errors.append(
+                            f"[REPO-POLICY-001] {df} (repo '{rname}'): regulated-workload requires branch_protection.min_reviewers >= 3 (got {min_rev})"
+                        )
+                    if bp.get("require_signed_commits", True) is not True:
+                        errors.append(
+                            f"[REPO-POLICY-002] {df} (repo '{rname}'): regulated-workload cannot disable branch_protection.require_signed_commits"
+                        )
+
+                sec = repo.get("security") or {}
+                if eff_arch != "sandbox":
+                    for sec_key in ("secret_scanning", "secret_scanning_push_protection", "dependabot_alerts"):
+                        if sec.get(sec_key, True) is False:
+                            errors.append(
+                                f"[REPO-POLICY-003] {df} (repo '{rname}'): cannot disable security.{sec_key} on non-sandbox archetype '{eff_arch}'"
+                            )
+
+                ms = repo.get("merge_strategies")
+                if isinstance(ms, dict):
+                    if not any(ms.get(k) for k in ("allow_squash_merge", "allow_merge_commit", "allow_rebase_merge")):
+                        errors.append(
+                            f"[REPO-POLICY-006] {df} (repo '{rname}'): merge_strategies must enable at least one merge method"
+                        )
+
+                for ta in repo.get("team_access") or []:
+                    if isinstance(ta, dict) and ta.get("team") not in team_slugs:
+                        errors.append(
+                            f"[REPO-TEAM-REF] {df} (repo '{rname}'): team_access references unknown team slug '{ta.get('team')}' (not in {teams_yaml_path})"
+                        )
+
+                for co in repo.get("codeowners_teams") or []:
+                    if isinstance(co, dict):
+                        for tslug in co.get("teams") or []:
+                            if tslug not in team_slugs:
+                                errors.append(
+                                    f"[REPO-TEAM-REF] {df} (repo '{rname}'): codeowners_teams references unknown team slug '{tslug}' (not in {teams_yaml_path})"
+                                )
+
+                validate_environments(repo.get("environments"), team_slugs, df, f"repo '{rname}'")
+
+                for vkey in (repo.get("environment_variables") or {}).keys():
+                    ukey = vkey.upper()
+                    for kw in SECRET_KEYWORDS:
+                        if kw in ukey:
+                            errors.append(
+                                f"[REPO-POLICY-007] {df} (repo '{rname}'): environment_variables key '{vkey}' matches sensitive keyword '{kw}'. Use GitHub Encrypted Secrets / Azure Key Vault OIDC instead."
+                            )
 
     for warning in warnings:
         print(f"  WARN: {warning}")
@@ -200,8 +355,8 @@ def main():
         return 1
 
     print(
-        f"  PASS: Validated config/org.yaml, config/groups.yaml, "
-        f"config/identity-bootstrap.yaml, and {len(project_files)} project file(s)."
+        f"  PASS: Validated config/enterprise.yaml, {len(discovered_org_dirs)} organization(s), "
+        f"{total_teams} team(s), {total_domains} domain file(s), and {total_repos} repository definition(s)."
     )
     return 0
 

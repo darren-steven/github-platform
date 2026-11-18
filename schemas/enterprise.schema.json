@@ -1,0 +1,249 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://taswater.internal/schemas/github-enterprise.schema.json",
+  "title": "GitHub Enterprise Cloud Baseline & Archetype Catalog Schema",
+  "description": "Validates enterprise-wide settings, managed organizations, and reusable repository archetypes in config/enterprise.yaml.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "enterprise",
+    "security_settings",
+    "archetypes"
+  ],
+  "properties": {
+    "enterprise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slug",
+        "name",
+        "url",
+        "managed_organizations"
+      ],
+      "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,62}$",
+          "description": "The GitHub Enterprise slug."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 64,
+          "description": "Display name of the GitHub Enterprise."
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^https://github\\.com/enterprises/[a-z0-9][a-z0-9-]{1,62}/?$",
+          "description": "Full HTTPS URL of the GitHub Enterprise."
+        },
+        "managed_organizations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,62}$"
+          },
+          "description": "List of GitHub Organization slugs managed under config/orgs/<slug>/."
+        }
+      }
+    },
+    "security_settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enforce_saml_sso",
+        "default_repository_permission",
+        "members_can_create_public_repositories"
+      ],
+      "properties": {
+        "enforce_saml_sso": {
+          "type": "boolean",
+          "enum": [
+            true
+          ],
+          "description": "Tier 1 Baseline: SAML/OIDC SSO must remain enforced across the enterprise."
+        },
+        "default_repository_permission": {
+          "type": "string",
+          "enum": [
+            "none",
+            "read"
+          ],
+          "default": "none",
+          "description": "Default base repository permission for organization members (least privilege: none)."
+        },
+        "members_can_create_public_repositories": {
+          "type": "boolean",
+          "enum": [
+            false
+          ],
+          "description": "Tier 1 Baseline: Public repository creation is strictly disabled across the enterprise."
+        }
+      }
+    },
+    "archetypes": {
+      "type": "object",
+      "description": "Catalog of reusable repository governance archetypes available to all organizations.",
+      "required": [
+        "standard-microservice",
+        "regulated-workload",
+        "shared-library",
+        "sandbox"
+      ],
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "description",
+          "visibility",
+          "features",
+          "merge_strategies",
+          "branch_protection",
+          "security"
+        ],
+        "properties": {
+          "description": {
+            "type": "string",
+            "minLength": 10
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "private",
+              "internal"
+            ],
+            "description": "Repository visibility (Tier 1 blocks 'public')."
+          },
+          "features": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "has_issues",
+              "has_wiki",
+              "has_discussions",
+              "has_projects"
+            ],
+            "properties": {
+              "has_issues": {
+                "type": "boolean"
+              },
+              "has_wiki": {
+                "type": "boolean"
+              },
+              "has_discussions": {
+                "type": "boolean"
+              },
+              "has_projects": {
+                "type": "boolean"
+              }
+            }
+          },
+          "merge_strategies": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "allow_squash_merge",
+              "allow_merge_commit",
+              "allow_rebase_merge",
+              "allow_auto_merge",
+              "delete_branch_on_merge"
+            ],
+            "properties": {
+              "allow_squash_merge": {
+                "type": "boolean"
+              },
+              "allow_merge_commit": {
+                "type": "boolean"
+              },
+              "allow_rebase_merge": {
+                "type": "boolean"
+              },
+              "allow_auto_merge": {
+                "type": "boolean"
+              },
+              "delete_branch_on_merge": {
+                "type": "boolean"
+              }
+            }
+          },
+          "branch_protection": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "min_reviewers",
+              "dismiss_stale_reviews",
+              "require_code_owner_reviews",
+              "require_last_push_approval",
+              "require_conversation_resolution",
+              "require_signed_commits",
+              "require_linear_history"
+            ],
+            "properties": {
+              "min_reviewers": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 5,
+                "description": "Minimum approving reviews required on default branch PRs (2..5)."
+              },
+              "dismiss_stale_reviews": {
+                "type": "boolean",
+                "enum": [
+                  true
+                ],
+                "description": "Tier 1 Baseline: Dismiss approving reviews when new commits are pushed."
+              },
+              "require_code_owner_reviews": {
+                "type": "boolean"
+              },
+              "require_last_push_approval": {
+                "type": "boolean",
+                "enum": [
+                  true
+                ],
+                "description": "Tier 1 Baseline: The most recent pusher cannot approve their own changes."
+              },
+              "require_conversation_resolution": {
+                "type": "boolean"
+              },
+              "require_signed_commits": {
+                "type": "boolean"
+              },
+              "require_linear_history": {
+                "type": "boolean"
+              }
+            }
+          },
+          "security": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "dependabot_alerts",
+              "dependabot_security_updates",
+              "secret_scanning",
+              "secret_scanning_push_protection",
+              "code_scanning_default_setup"
+            ],
+            "properties": {
+              "dependabot_alerts": {
+                "type": "boolean"
+              },
+              "dependabot_security_updates": {
+                "type": "boolean"
+              },
+              "secret_scanning": {
+                "type": "boolean"
+              },
+              "secret_scanning_push_protection": {
+                "type": "boolean"
+              },
+              "code_scanning_default_setup": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

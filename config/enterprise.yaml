@@ -1,0 +1,144 @@
+# yaml-language-server: $schema=../schemas/enterprise.schema.json
+# =============================================================================
+# GitHub Enterprise Cloud Baseline & Repository Archetype Catalog
+# =============================================================================
+# Defines enterprise-level security invariants, the list of governed GitHub
+# Organizations, and the reusable repository archetypes inherited across all
+# domain repository files (`config/orgs/<org>/repos/<domain>.yaml`).
+# =============================================================================
+
+enterprise:
+  slug: "taswater"
+  name: "TasWater Enterprise"
+  url: "https://github.com/enterprises/taswater"
+  managed_organizations:
+    - "taswater-core"
+    - "taswater-digital"
+
+# -----------------------------------------------------------------------------
+# Enterprise Security Settings (Tier 1 Immutable Baselines)
+# -----------------------------------------------------------------------------
+security_settings:
+  enforce_saml_sso: true
+  default_repository_permission: "none"
+  members_can_create_public_repositories: false
+
+# -----------------------------------------------------------------------------
+# Reusable Repository Governance Archetypes
+# -----------------------------------------------------------------------------
+archetypes:
+  standard-microservice:
+    description: "Standard internal microservice, backend API, or worker repository."
+    visibility: "private"
+    features:
+      has_issues: true
+      has_wiki: false
+      has_discussions: false
+      has_projects: false
+    merge_strategies:
+      allow_squash_merge: true
+      allow_merge_commit: true
+      allow_rebase_merge: false
+      allow_auto_merge: true
+      delete_branch_on_merge: true
+    branch_protection:
+      min_reviewers: 2
+      dismiss_stale_reviews: true
+      require_code_owner_reviews: true
+      require_last_push_approval: true
+      require_conversation_resolution: true
+      require_signed_commits: false
+      require_linear_history: false
+    security:
+      dependabot_alerts: true
+      dependabot_security_updates: true
+      secret_scanning: true
+      secret_scanning_push_protection: true
+      code_scanning_default_setup: true
+
+  regulated-workload:
+    description: "High-compliance, identity, financial, or critical OT/infrastructure workload requiring 3+ reviewers and signed commits."
+    visibility: "private"
+    features:
+      has_issues: true
+      has_wiki: false
+      has_discussions: false
+      has_projects: false
+    merge_strategies:
+      allow_squash_merge: true
+      allow_merge_commit: false
+      allow_rebase_merge: false
+      allow_auto_merge: false
+      delete_branch_on_merge: true
+    branch_protection:
+      min_reviewers: 3
+      dismiss_stale_reviews: true
+      require_code_owner_reviews: true
+      require_last_push_approval: true
+      require_conversation_resolution: true
+      require_signed_commits: true
+      require_linear_history: true
+    security:
+      dependabot_alerts: true
+      dependabot_security_updates: true
+      secret_scanning: true
+      secret_scanning_push_protection: true
+      code_scanning_default_setup: true
+
+  shared-library:
+    description: "Inner-source SDK, shared module, or documentation repository visible across all enterprise organizations."
+    visibility: "internal"
+    features:
+      has_issues: true
+      has_wiki: false
+      has_discussions: true
+      has_projects: false
+    merge_strategies:
+      allow_squash_merge: true
+      allow_merge_commit: false
+      allow_rebase_merge: true
+      allow_auto_merge: true
+      delete_branch_on_merge: true
+    branch_protection:
+      min_reviewers: 2
+      dismiss_stale_reviews: true
+      require_code_owner_reviews: true
+      require_last_push_approval: true
+      require_conversation_resolution: true
+      require_signed_commits: false
+      require_linear_history: true
+    security:
+      dependabot_alerts: true
+      dependabot_security_updates: true
+      secret_scanning: true
+      secret_scanning_push_protection: true
+      code_scanning_default_setup: true
+
+  sandbox:
+    description: "Non-production experimentation and proof-of-concept repository isolated from production environments."
+    visibility: "private"
+    features:
+      has_issues: true
+      has_wiki: true
+      has_discussions: false
+      has_projects: false
+    merge_strategies:
+      allow_squash_merge: true
+      allow_merge_commit: true
+      allow_rebase_merge: true
+      allow_auto_merge: true
+      delete_branch_on_merge: true
+    branch_protection:
+      min_reviewers: 2
+      dismiss_stale_reviews: true
+      require_code_owner_reviews: false
+      require_last_push_approval: true
+      require_conversation_resolution: false
+      require_signed_commits: false
+      require_linear_history: false
+    security:
+      dependabot_alerts: true
+      dependabot_security_updates: false
+      secret_scanning: true
+      secret_scanning_push_protection: true
+      code_scanning_default_setup: false

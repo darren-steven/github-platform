@@ -1,137 +1,197 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://taswaterinternal/schemas/azdo-org.schema.json",
-  "title": "Azure DevOps Organization Policy & Dials Schema",
-  "description": "Validates organization-level configuration dials (Tier 2) against the Azure DevOps Organization baseline (Tier 1).",
+  "$id": "https://taswater.internal/schemas/github-org.schema.json",
+  "title": "GitHub Organization Policy & Dials Schema",
+  "description": "Validates organization-level configuration dials (Tier 2) in config/orgs/<org>/org.yaml against the GitHub Enterprise baseline.",
   "type": "object",
   "additionalProperties": false,
   "required": [
     "organization",
     "security_dials",
-    "pipeline_dials",
+    "actions_dials",
     "repository_defaults",
-    "agent_pools"
+    "runner_groups"
   ],
   "properties": {
     "organization": {
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "slug",
         "name",
-        "service_url"
+        "description",
+        "billing_email",
+        "default_archetype"
       ],
       "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,62}$",
+          "description": "The GitHub Organization slug (e.g., 'taswater-core')."
+        },
         "name": {
           "type": "string",
-          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{1,62}$",
-          "description": "The Azure DevOps organization slug (e.g., 'taswater-engineering')."
+          "minLength": 3,
+          "maxLength": 64,
+          "description": "Display name of the GitHub Organization."
         },
-        "service_url": {
+        "description": {
           "type": "string",
-          "pattern": "^https://dev\\.azure\\.com/[a-zA-Z0-9][a-zA-Z0-9-]{1,62}/?$",
-          "description": "Full HTTPS URL of the Azure DevOps organization."
+          "minLength": 10,
+          "description": "Purpose and domain scope of the organization."
         },
-        "default_process_template": {
+        "billing_email": {
+          "type": "string",
+          "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+          "description": "Billing and administrative contact email for the organization."
+        },
+        "default_archetype": {
           "type": "string",
           "enum": [
-            "Agile",
-            "Scrum",
-            "CMMI",
-            "Basic"
+            "standard-microservice",
+            "regulated-workload",
+            "shared-library",
+            "sandbox"
           ],
-          "default": "Agile",
-          "description": "Default work item process template for new projects unless overridden."
+          "default": "standard-microservice",
+          "description": "Default repository archetype applied when a domain or repo does not specify one."
         }
       }
     },
     "security_dials": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Organization-level security dials. Note: Public projects (false), Anonymous access (disallowed), and Conditional Access (enforced) are Tier 1 locked baselines and cannot be toggled here.",
+      "description": "Organization-level member privilege and GHAS default dials. Note: Public repo creation (false) and SAML SSO (true) are Tier 1 locked baselines.",
       "required": [
-        "allow_team_admins_invite",
-        "ssh_authentication_enabled",
-        "disallow_third_party_oauth"
+        "members_can_create_private_repositories",
+        "members_can_create_internal_repositories",
+        "members_can_fork_private_repositories",
+        "web_commit_signoff_required",
+        "dependabot_alerts_enabled_for_new_repositories",
+        "secret_scanning_enabled_for_new_repositories",
+        "secret_scanning_push_protection_enabled_for_new_repositories"
       ],
       "properties": {
-        "allow_team_admins_invite": {
+        "members_can_create_private_repositories": {
           "type": "boolean",
           "default": false,
-          "description": "Dial: Whether Project and Team Administrators can invite new users to the organization (Default: false)."
+          "description": "Dial: Whether organization members can create private repos outside IaC (Default: false)."
         },
-        "ssh_authentication_enabled": {
+        "members_can_create_internal_repositories": {
+          "type": "boolean",
+          "default": false,
+          "description": "Dial: Whether organization members can create internal repos outside IaC (Default: false)."
+        },
+        "members_can_fork_private_repositories": {
+          "type": "boolean",
+          "default": false,
+          "description": "Dial: Whether members can fork private/internal repositories (Default: false)."
+        },
+        "web_commit_signoff_required": {
+          "type": "boolean",
+          "default": false,
+          "description": "Dial: Require contributors to sign off on web-based commits."
+        },
+        "dependabot_alerts_enabled_for_new_repositories": {
           "type": "boolean",
           "default": true,
-          "description": "Dial: Whether SSH key authentication is allowed for Git operations across the organization (Default: true)."
+          "description": "Dial: Automatically enable Dependabot alerts on new repositories."
         },
-        "disallow_third_party_oauth": {
+        "secret_scanning_enabled_for_new_repositories": {
           "type": "boolean",
           "default": true,
-          "description": "Dial: Block third-party application access via OAuth (Default: true; Entra ID auth remains enabled)."
+          "description": "Dial: Automatically enable GitHub Advanced Security secret scanning on new repositories."
+        },
+        "secret_scanning_push_protection_enabled_for_new_repositories": {
+          "type": "boolean",
+          "default": true,
+          "description": "Dial: Automatically block pushes containing detected secrets across new repositories."
         }
       }
     },
-    "pipeline_dials": {
+    "actions_dials": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Organization and default project pipeline dials. Note: Classic Build and Classic Release pipelines are disabled by Tier 1 baseline.",
+      "description": "GitHub Actions workflow execution and token governance dials.",
       "required": [
-        "default_job_timeout_minutes",
-        "enforce_settable_var_at_queue",
-        "enforce_job_auth_scope_to_project",
-        "enforce_referenced_repo_scoped_token",
-        "publish_pipeline_metadata"
+        "allowed_actions",
+        "allow_github_owned_actions",
+        "allow_verified_creator_actions",
+        "default_workflow_permissions",
+        "can_approve_pull_request_reviews",
+        "sha_pinning_required",
+        "default_job_timeout_minutes"
       ],
       "properties": {
+        "allowed_actions": {
+          "type": "string",
+          "enum": [
+            "selected",
+            "local_only"
+          ],
+          "default": "selected",
+          "description": "Dial: Restrict reusable GitHub Actions to selected trusted patterns or local-only."
+        },
+        "allow_github_owned_actions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Dial: Allow actions authored by GitHub (actions/*, github/*)."
+        },
+        "allow_verified_creator_actions": {
+          "type": "boolean",
+          "default": true,
+          "description": "Dial: Allow actions authored by GitHub Marketplace verified creators."
+        },
+        "default_workflow_permissions": {
+          "type": "string",
+          "enum": [
+            "read"
+          ],
+          "default": "read",
+          "description": "Tier 1 Baseline: Default GITHUB_TOKEN permissions must be read-only."
+        },
+        "can_approve_pull_request_reviews": {
+          "type": "boolean",
+          "enum": [
+            false
+          ],
+          "default": false,
+          "description": "Tier 1 Baseline: GitHub Actions workflows must not be allowed to approve pull requests."
+        },
+        "sha_pinning_required": {
+          "type": "boolean",
+          "default": true,
+          "description": "Dial: Require third-party Actions to be pinned to a full-length commit SHA."
+        },
         "default_job_timeout_minutes": {
           "type": "integer",
           "minimum": 15,
           "maximum": 180,
           "default": 60,
-          "description": "Dial: Default pipeline job timeout in minutes (Allowed bound: 15..180)."
-        },
-        "enforce_settable_var_at_queue": {
-          "type": "boolean",
-          "default": true,
-          "description": "Dial: Restrict variables that can be set when a pipeline is queued only to those explicitly marked settable at queue time."
-        },
-        "enforce_job_auth_scope_to_project": {
-          "type": "boolean",
-          "default": true,
-          "description": "Dial: Limit job authorization scope to the current project for non-release and release pipelines."
-        },
-        "enforce_referenced_repo_scoped_token": {
-          "type": "boolean",
-          "default": true,
-          "description": "Dial: Protect access to repositories in YAML pipelines by scoping tokens to explicitly referenced repositories."
-        },
-        "publish_pipeline_metadata": {
-          "type": "boolean",
-          "default": true,
-          "description": "Dial: Allow pipelines to record build and deployment metadata for traceability."
+          "description": "Dial: Default workflow job timeout in minutes (Allowed bound: 15..180)."
         }
       }
     },
     "repository_defaults": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Organization-wide default branch protection dials applied to every project unless overridden within allowed bounds.",
+      "description": "Organization-wide default branch protection and merge dials applied unless overridden by archetype or repository.",
       "required": [
         "default_branch",
         "min_reviewers",
-        "reset_votes_on_new_push",
-        "require_work_item_linking",
-        "require_comment_resolution",
-        "build_validation_expiry_hours",
+        "dismiss_stale_reviews",
+        "require_code_owner_reviews",
+        "require_last_push_approval",
+        "require_conversation_resolution",
         "allowed_merge_types"
       ],
       "properties": {
         "default_branch": {
           "type": "string",
           "enum": [
-            "refs/heads/main"
+            "main"
           ],
-          "default": "refs/heads/main",
+          "default": "main",
           "description": "Standard default branch name across the organization."
         },
         "min_reviewers": {
@@ -139,45 +199,44 @@
           "minimum": 2,
           "maximum": 5,
           "default": 2,
-          "description": "Dial: Default minimum required reviewers on pull requests to the default branch (Allowed bound: 2..5)."
+          "description": "Dial: Default minimum required approving reviews on pull requests to main (Allowed bound: 2..5)."
         },
-        "reset_votes_on_new_push": {
+        "dismiss_stale_reviews": {
           "type": "boolean",
           "default": true,
-          "description": "Dial: Reset all approval votes when new changes are pushed to a pull request source branch."
+          "description": "Dial: Dismiss stale pull request approvals when new commits are pushed."
         },
-        "require_work_item_linking": {
+        "require_code_owner_reviews": {
           "type": "boolean",
           "default": true,
-          "description": "Dial: Require every pull request to link at least one Azure Boards work item."
+          "description": "Dial: Require review from CODEOWNERS when matching paths are modified."
         },
-        "require_comment_resolution": {
+        "require_last_push_approval": {
           "type": "boolean",
           "default": true,
-          "description": "Dial: Require all PR review comments to be resolved before merge."
+          "description": "Dial: Require approval from someone other than the last person to push to the PR branch."
         },
-        "build_validation_expiry_hours": {
-          "type": "integer",
-          "minimum": 12,
-          "maximum": 72,
-          "default": 24,
-          "description": "Dial: Hours before a passing PR build validation expires if the target branch is updated (Allowed bound: 12..72)."
+        "require_conversation_resolution": {
+          "type": "boolean",
+          "default": true,
+          "description": "Dial: Require all PR review conversations to be resolved before merging."
         },
         "allowed_merge_types": {
           "type": "object",
           "additionalProperties": false,
           "required": [
             "squash",
-            "no_fast_forward",
+            "merge_commit",
             "rebase",
-            "rebase_merge"
+            "auto_merge",
+            "delete_branch_on_merge"
           ],
           "properties": {
             "squash": {
               "type": "boolean",
               "default": true
             },
-            "no_fast_forward": {
+            "merge_commit": {
               "type": "boolean",
               "default": true
             },
@@ -185,46 +244,50 @@
               "type": "boolean",
               "default": false
             },
-            "rebase_merge": {
+            "auto_merge": {
               "type": "boolean",
-              "default": false
+              "default": true
+            },
+            "delete_branch_on_merge": {
+              "type": "boolean",
+              "default": true
             }
           }
         }
       }
     },
-    "agent_pools": {
+    "runner_groups": {
       "type": "array",
-      "description": "Self-hosted or Managed DevOps Pool definitions at the organization level.",
+      "description": "Self-hosted or GitHub-hosted Larger Runner groups at the organization level.",
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": [
           "name",
-          "auto_provision",
-          "auto_update"
+          "visibility",
+          "allow_public_repositories"
         ],
         "properties": {
           "name": {
             "type": "string",
             "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-_ ]{1,62}$"
           },
-          "pool_type": {
+          "visibility": {
             "type": "string",
             "enum": [
-              "automation",
-              "deployment"
+              "selected",
+              "all"
             ],
-            "default": "automation"
+            "default": "selected",
+            "description": "Dial: Restrict runner group access to selected repositories (recommended) or all private/internal repos."
           },
-          "auto_provision": {
+          "allow_public_repositories": {
             "type": "boolean",
+            "enum": [
+              false
+            ],
             "default": false,
-            "description": "Dial: Automatically provision queues in all projects (Default: false to maintain least privilege)."
-          },
-          "auto_update": {
-            "type": "boolean",
-            "default": true
+            "description": "Tier 1 Baseline: Public repositories can never use organization runner groups."
           }
         }
       }

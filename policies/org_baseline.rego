@@ -4,7 +4,7 @@ import rego.v1
 
 # =============================================================================
 # Organization Baseline Policies (`policies/org_baseline.rego`)
-# Enforces cross-field invariants on `config/org.yaml`
+# Enforces cross-field invariants on `config/orgs/<org>/org.yaml`
 # =============================================================================
 
 # Guardrail 1: Default minimum reviewers must be between 2 and 5
@@ -33,40 +33,51 @@ deny contains msg if {
 	input.organization
 	merges := input.repository_defaults.allowed_merge_types
 	not merges.squash
-	not merges.no_fast_forward
+	not merges.merge_commit
 	not merges.rebase
-	not merges.rebase_merge
-	msg := "[ORG-BASELINE-003] repository_defaults.allowed_merge_types must enable at least one merge strategy (e.g., squash: true or no_fast_forward: true)."
+	msg := "[ORG-BASELINE-003] repository_defaults.allowed_merge_types must enable at least one merge strategy (squash, merge_commit, or rebase)."
 }
 
-# Guardrail 3: Pipeline job timeout must be within 15..180 minutes
+# Guardrail 3: GitHub Actions job timeout must be within 15..180 minutes and token permissions read-only
 deny contains msg if {
 	input.organization
-	timeout := input.pipeline_dials.default_job_timeout_minutes
+	timeout := input.actions_dials.default_job_timeout_minutes
 	timeout < 15
 	msg := sprintf(
-		"[ORG-BASELINE-004] pipeline_dials.default_job_timeout_minutes (%d) cannot be less than 15 minutes.",
+		"[ORG-BASELINE-004] actions_dials.default_job_timeout_minutes (%d) cannot be less than 15 minutes.",
 		[timeout],
 	)
 }
 
 deny contains msg if {
 	input.organization
-	timeout := input.pipeline_dials.default_job_timeout_minutes
+	timeout := input.actions_dials.default_job_timeout_minutes
 	timeout > 180
 	msg := sprintf(
-		"[ORG-BASELINE-005] pipeline_dials.default_job_timeout_minutes (%d) cannot exceed 180 minutes.",
+		"[ORG-BASELINE-005] actions_dials.default_job_timeout_minutes (%d) cannot exceed 180 minutes.",
 		[timeout],
 	)
 }
 
-# Guardrail 4: Agent pools must not auto-provision across all projects by default
+deny contains msg if {
+	input.organization
+	input.actions_dials.default_workflow_permissions != "read"
+	msg := "[ORG-BASELINE-006] actions_dials.default_workflow_permissions must be 'read' to enforce least privilege on GITHUB_TOKEN."
+}
+
+deny contains msg if {
+	input.organization
+	input.actions_dials.can_approve_pull_request_reviews != false
+	msg := "[ORG-BASELINE-007] actions_dials.can_approve_pull_request_reviews must be false."
+}
+
+# Guardrail 4: Warn if runner groups are exposed to all repositories rather than selected
 warn contains msg if {
 	input.organization
-	some pool in input.agent_pools
-	pool.auto_provision == true
+	some rg in input.runner_groups
+	rg.visibility == "all"
 	msg := sprintf(
-		"[ORG-BASELINE-WARN-001] Agent pool '%s' has auto_provision=true. Consider setting auto_provision=false and granting queue access per project for least privilege.",
-		[pool.name],
+		"[ORG-BASELINE-WARN-001] Runner group '%s' has visibility='all'. Consider setting visibility='selected' for least privilege.",
+		[rg.name],
 	)
 }

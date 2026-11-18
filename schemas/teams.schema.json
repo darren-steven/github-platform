@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://taswater.internal/schemas/github-teams.schema.json",
+  "title": "GitHub Organization Teams Catalog Schema",
+  "description": "Validates centralized GitHub Team definitions and Entra ID IdP group mappings in config/orgs/<org>/teams.yaml.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "organization",
+    "teams"
+  ],
+  "properties": {
+    "organization": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,62}$",
+      "description": "The owning GitHub Organization slug."
+    },
+    "teams": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "slug",
+          "name",
+          "description",
+          "privacy",
+          "role_tier"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,62}$",
+            "description": "Immutable kebab-case team slug used for @org/<slug> references across repository files."
+          },
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 64,
+            "description": "Display name of the GitHub Team."
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10,
+            "description": "Clear description of the team's responsibilities and domain scope."
+          },
+          "privacy": {
+            "type": "string",
+            "enum": [
+              "closed"
+            ],
+            "default": "closed",
+            "description": "Team visibility within the organization ('closed' is required so teams can be nested and referenced in CODEOWNERS)."
+          },
+          "role_tier": {
+            "type": "string",
+            "enum": [
+              "platform-admin",
+              "maintainer",
+              "contributor",
+              "auditor",
+              "automation"
+            ],
+            "description": "Governance persona tier for this team."
+          },
+          "parent_team": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,62}$",
+            "description": "Optional slug of the parent GitHub Team within the same organization."
+          },
+          "idp_group_id": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "description": "Optional Entra ID (Azure AD) Group Object ID synchronized via Enterprise Team Sync / SCIM."
+          },
+          "maintainers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,38}$"
+            },
+            "default": [],
+            "description": "Optional explicit GitHub usernames with team maintainer role (when not solely IdP-synced)."
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]{0,38}$"
+            },
+            "default": [],
+            "description": "Optional explicit GitHub usernames with team member role (prefer idp_group_id where possible)."
+          }
+        }
+      }
+    }
+  }
+}

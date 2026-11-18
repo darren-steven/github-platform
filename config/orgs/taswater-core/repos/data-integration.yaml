@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+# =============================================================================
+# Domain Repositories: Data & Integration (`taswater-core`)
+# =============================================================================
+
+domain:
+  key: "data-integration"
+  name: "Data & Integration Services"
+  description: "Hosts SSIS Manager, enterprise integration APIs, and data platform repositories."
+  organization: "taswater-core"
+
+defaults:
+  archetype: "standard-microservice"
+  topics:
+    - "data-integration"
+    - "taswater-core"
+  team_access:
+    - team: "data-integration-developers"
+      permission: "push"
+    - team: "data-integration-maintainers"
+      permission: "maintain"
+    - team: "security-auditors"
+      permission: "pull"
+  environments:
+    - name: "dev"
+      description: "Development environment"
+      require_approval: false
+    - name: "staging"
+      description: "Pre-production staging environment"
+      require_approval: false
+    - name: "prod"
+      description: "Production environment"
+      require_approval: true
+      approver_teams:
+        - "data-integration-maintainers"
+
+repositories:
+  - name: "ssis-manager-api"
+    description: "SSIS Manager backend REST API service."
+    merge_strategies:
+      allow_squash_merge: false
+      allow_merge_commit: true
+      allow_rebase_merge: false
+      allow_auto_merge: true
+      delete_branch_on_merge: true
+
+  - name: "ssis-manager-power"
+    description: "SSIS Manager Power automate and reporting integration components."
+    merge_strategies:
+      allow_squash_merge: false
+      allow_merge_commit: true
+      allow_rebase_merge: false
+      allow_auto_merge: true
+      delete_branch_on_merge: true
+
+  - name: "water-quality-telemetry-ingest"
+    description: "Regulated telemetry ingestion pipeline for water quality compliance reporting."
+    archetype: "regulated-workload"
+    team_access:
+      - team: "data-integration-developers"
+        permission: "push"
+      - team: "data-integration-maintainers"
+        permission: "maintain"
+      - team: "ot-scada-maintainers"
+        permission: "maintain"
+      - team: "security-auditors"
+        permission: "pull"

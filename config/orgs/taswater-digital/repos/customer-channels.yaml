@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+# =============================================================================
+# Domain Repositories: Customer Channels (`taswater-digital`)
+# =============================================================================
+
+domain:
+  key: "customer-channels"
+  name: "Customer Channels & Billing"
+  description: "Customer self-service web portal, BFF APIs, payment gateway integration, and design system."
+  organization: "taswater-digital"
+
+defaults:
+  archetype: "standard-microservice"
+  topics:
+    - "customer-channels"
+    - "taswater-digital"
+  team_access:
+    - team: "customer-portal-developers"
+      permission: "push"
+    - team: "customer-portal-maintainers"
+      permission: "maintain"
+    - team: "digital-security-auditors"
+      permission: "pull"
+  environments:
+    - name: "dev"
+      description: "Development integration environment"
+      require_approval: false
+    - name: "staging"
+      description: "Staging UAT environment"
+      require_approval: false
+    - name: "prod"
+      description: "Production customer-facing environment"
+      require_approval: true
+      approver_teams:
+        - "customer-portal-maintainers"
+
+repositories:
+  - name: "customer-portal-web"
+    description: "Customer self-service web application frontend."
+    required_status_checks:
+      - "ci / lint-and-unit"
+      - "ci / e2e-playwright"
+
+  - name: "customer-portal-bff"
+    description: "Backend-for-frontend GraphQL and REST aggregation service for Customer Portal."
+    required_status_checks:
+      - "ci / build-and-test"
+
+  - name: "billing-payment-gateway"
+    description: "PCI-scoped billing and payment gateway integration service."
+    archetype: "regulated-workload"
+    branch_protection:
+      min_reviewers: 3
+      require_signed_commits: true
+    codeowners_teams:
+      - path: "/*"
+        teams:
+          - "customer-portal-maintainers"
+          - "digital-platform-admins"
+
+  - name: "digital-design-system"
+    description: "Shared UI component library published across TasWater digital applications."
+    archetype: "shared-library"
+
+  - name: "ai-bill-explainer-poc"
+    description: "Sandbox prototype exploring conversational bill inquiries."
+    archetype: "sandbox"
+    environments:
+      - name: "dev"
+        description: "Sandbox development environment"
+        require_approval: false

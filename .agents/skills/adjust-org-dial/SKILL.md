@@ -2,31 +2,32 @@
 name: adjust-org-dial
 description: >-
   Guides maintainers through safely inspecting and modifying an exposed organization,
-  group, or project configuration dial in config/*.yaml within approved baseline bounds.
-  Use this skill when a user asks to change an Azure DevOps policy, branch setting,
-  pipeline timeout, reviewer count, or project setting.
+  team, domain, or repository configuration dial in config/**/*.yaml within approved
+  baseline bounds. Use this skill when a user asks to change a GitHub repository
+  policy, branch setting, Actions timeout, reviewer count, or organization setting.
 ---
 
-# Adjust Organization or Project Dial (`adjust-org-dial`)
+# Adjust Organization, Domain, or Repository Dial (`adjust-org-dial`)
 
-Use this skill whenever a user wants to modify an existing setting for the Azure DevOps Organization (`config/org.yaml`), organization groups (`config/groups.yaml`), or a project (`config/projects/<project>.yaml`).
+Use this skill whenever a user wants to modify an existing setting for the GitHub Enterprise (`config/enterprise.yaml`), an organization (`config/orgs/<org>/org.yaml`), teams (`config/orgs/<org>/teams.yaml`), or domain-grouped repositories (`config/orgs/<org>/repos/<domain>.yaml`).
 
 ## Workflow Steps
 
 ### Step 1: Identify Target Scope & Classify the Request
 1. Determine whether the user wants to adjust:
-   - **Organization-wide setting** -> [config/org.yaml](../../../config/org.yaml) (Schema: [schemas/org.schema.json](../../../schemas/org.schema.json))
-   - **Organization group / entitlement** -> [config/groups.yaml](../../../config/groups.yaml) (Schema: [schemas/groups.schema.json](../../../schemas/groups.schema.json))
-   - **Project-specific setting** -> `config/projects/<project-key>.yaml` (Schema: [schemas/project.schema.json](../../../schemas/project.schema.json))
+   - **Enterprise-wide setting or archetype** -> [config/enterprise.yaml](../../../config/enterprise.yaml) (Schema: [schemas/enterprise.schema.json](../../../schemas/enterprise.schema.json))
+   - **Organization-wide setting** -> `config/orgs/<org>/org.yaml` (Schema: [schemas/org.schema.json](../../../schemas/org.schema.json))
+   - **Organization team catalog** -> `config/orgs/<org>/teams.yaml` (Schema: [schemas/teams.schema.json](../../../schemas/teams.schema.json))
+   - **Domain or repository setting** -> `config/orgs/<org>/repos/<domain>.yaml` (Schema: [schemas/domain-repos.schema.json](../../../schemas/domain-repos.schema.json))
 2. Check [docs/dials-catalog.md](../../../docs/dials-catalog.md) and the corresponding JSON Schema in `schemas/` to verify whether the requested setting is:
    - **Tier 2 (Exposed Bounded Dial)**: Check the allowed `minimum`, `maximum`, or `enum` values.
-   - **Tier 1 (Locked Baseline)**: Not exposed in YAML or locked by `policies/*.rego` (e.g., making a project public, allowing 1 reviewer on default branch, allowing self-approval, enabling classic pipelines).
+   - **Tier 1 (Locked Baseline)**: Locked by `schemas/` or `policies/*.rego` (e.g., making a repository public, granting team `admin` access, allowing 1 reviewer on `main`, disabling secret scanning on production archetypes, or enabling write-all default `GITHUB_TOKEN`).
 
 ### Step 2: Enforce Baseline Guardrail (If Out of Bounds)
 - **STOP** if the requested value violates a Tier 1 baseline or falls outside Tier 2 schema bounds.
-- **Do NOT** edit `modules/`, `schemas/`, or `policies/` to force the change through.
+- **Do NOT** edit `schemas/`, `policies/`, or `scripts/` to force the change through.
 - Explain clearly to the user:
-  1. Why the requested value is blocked by the organization baseline.
+  1. Why the requested value is blocked by the enterprise/organization baseline.
   2. The allowed bounds for that dial (e.g., `min_reviewers` allows `2` to `5`).
   3. Ask if they would like to apply the nearest compliant value instead.
 
@@ -41,5 +42,5 @@ Use this skill whenever a user wants to modify an existing setting for the Azure
    ```
 2. Summarize the change for the user, explicitly stating:
    - **Modified Dial & Value**: Old value -> New value.
-   - **Blast Radius**: Single repository, single project, or all projects across the organization.
-   - **Approval Required**: `Maintainer` approval (for `config/projects/*` and `config/groups.yaml`) or `Platform Admin` approval (for `config/org.yaml`).
+   - **Blast Radius**: Single repository, domain group (5–15 repos), organization-wide, or enterprise-wide.
+   - **Approval Required**: `Maintainer` approval (for `config/orgs/<org>/repos/*` and `teams.yaml`) or `Platform Admin` approval (for `config/enterprise.yaml` and `config/orgs/<org>/org.yaml`).

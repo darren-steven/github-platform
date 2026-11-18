@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=../../../schemas/teams.schema.json
+# =============================================================================
+# GitHub Organization Teams Catalog: taswater-digital
+# =============================================================================
+
+organization: "taswater-digital"
+
+teams:
+  - slug: "digital-platform-admins"
+    name: "Digital Platform Admins"
+    description: "Platform administrators governing the taswater-digital organization."
+    privacy: "closed"
+    role_tier: "platform-admin"
+    idp_group_id: "22222222-2222-2222-2222-222222222201"
+
+  - slug: "digital-security-auditors"
+    name: "Digital Security Auditors"
+    description: "Security and compliance observers for customer-facing digital workloads."
+    privacy: "closed"
+    role_tier: "auditor"
+    idp_group_id: "22222222-2222-2222-2222-222222222202"
+
+  - slug: "customer-portal-maintainers"
+    name: "Customer Portal Maintainers"
+    description: "Technical leads and production approvers for customer portal and billing services."
+    privacy: "closed"
+    role_tier: "maintainer"
+    idp_group_id: "22222222-2222-2222-2222-222222222203"
+
+  - slug: "customer-portal-developers"
+    name: "Customer Portal Developers"
+    description: "Frontend and backend engineers building customer self-service applications."
+    privacy: "closed"
+    role_tier: "contributor"
+    parent_team: "customer-portal-maintainers"
+    idp_group_id: "22222222-2222-2222-2222-222222222204"
+
+  - slug: "field-mobility-maintainers"
+    name: "Field Mobility Maintainers"
+    description: "Technical leads for field service mobile applications and dispatch APIs."
+    privacy: "closed"
+    role_tier: "maintainer"
+    idp_group_id: "22222222-2222-2222-2222-222222222205"
+
+  - slug: "field-mobility-developers"
+    name: "Field Mobility Developers"
+    description: "Mobile and API contributors for field operations tools."
+    privacy: "closed"
+    role_tier: "contributor"
+    parent_team: "field-mobility-maintainers"
+    idp_group_id: "22222222-2222-2222-2222-222222222206"

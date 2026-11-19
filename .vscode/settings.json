@@ -9,7 +9,7 @@
   },
   "files.associations": {
     "*.rego": "rego",
-    "*.tf": "terraform"
+    "*.tf": "opentofu"
   },
   "recommendations": [
     "hashicorp.terraform",

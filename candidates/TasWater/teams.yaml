@@ -1,8 +1,0 @@
-# yaml-language-server: $schema=../../../schemas/teams.schema.json
-organization: TasWater
-teams:
-- slug: TasWater-maintainers
-  name: TasWater Maintainers
-  description: Default maintainer team for TasWater repositories.
-  privacy: closed
-  role_tier: maintainer

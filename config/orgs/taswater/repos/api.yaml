@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: api
+  name: Api Domain
+  description: Repositories aligned to the Api domain in taswater.
+  organization: taswater
+defaults:
+  archetype: standard-microservice
+  topics:
+  - api
+  - taswater
+  team_access:
+  - team: bsa
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - bsa
+repositories:
+- name: api-employee-v1
+  description: Repository api-employee-v1
+- name: api-payway-proxy
+  description: AnyPoint proxy API configuration for PayWay
+- name: api-people-v1
+  description: API for People and Safety ( HR )
+  archetype: shared-library
+- name: api-service-desk-v1
+  description: Just a little test api
+- name: api-sewerage-pricing-estimator-v1
+  description: Test api only.
+  archetype: shared-library

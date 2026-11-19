@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: fusion5
+  name: Fusion5 Domain
+  description: Repositories aligned to the Fusion5 domain in taswater.
+  organization: taswater
+defaults:
+  archetype: shared-library
+  topics:
+  - fusion5
+  - taswater
+  team_access:
+  - team: fusion5
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - fusion5
+repositories:
+- name: account-bc-sapi-v1
+  description: Business Central system API for fixed-asset, invoice, general-journal
+    etc.
+- name: account-mgmt-eapi-v1
+  description: experience API for fixed-asset, invoice, general-journal etc. to allow
+    Maximo to send requests
+- name: finance-bc-sapi-v1
+  description: System API for Business central to fetch project, job, coa, vendors
+    etc
+- name: finance-db-sapi-v1
+  description: System API for writing Business Central staging data like job costs,
+    gl_transactions into the TW database.
+- name: finance-integ-papi-v1
+  description: Integration API to run scheduled jobs to sync vendors, coa, projects
+    from Business Central to other systems

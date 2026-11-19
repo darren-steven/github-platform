@@ -164,8 +164,8 @@
         "properties": {
           "name": {
             "type": "string",
-            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-_.]{1,99}$",
-            "description": "Repository name within the GitHub Organization."
+            "pattern": "^(\\.github(-private)?|[a-zA-Z0-9][a-zA-Z0-9-_.]{1,99})$",
+            "description": "Repository name within the GitHub Organization (including GitHub's special .github / .github-private repositories)."
           },
           "description": {
             "type": "string",

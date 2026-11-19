@@ -67,3 +67,16 @@ Every change to `config/` passes through four automated verification gates befor
    - Blocks secret-like key names in plain-text `environment_variables`.
 4. **Layer 4: Cross-Agent AI Skill Integrity (`scripts/validate_agent_guardrails.py`)**:
    - Verifies that `.agents/skills/*/SKILL.md` and `AGENTS.md` / `GEMINI.md` / `.github/copilot-instructions.md` remain synchronized.
+
+---
+
+## 4. OpenTofu IaC Engine (`modules/` & `environments/`)
+
+Validated YAML configurations in `config/` are consumed by a modular OpenTofu (`>= 1.8.0`) backend powered by the `integrations/github` (`~> 6.6`) provider:
+
+- **`environments/<org>/`**: One isolated root stack per GitHub Organization (starting with [`environments/taswater/`](./environments/taswater/README.md)), isolating blast radius and state files.
+- **`modules/config-resolver/`**: Pure-HCL transformation layer that decodes `enterprise.yaml`, `org.yaml`, `teams.yaml`, and `repos/*.yaml` and merges the 4-layer inheritance hierarchy.
+- **`modules/org-baseline/`**: Manages `github_organization_settings`, `github_actions_organization_permissions`, `github_actions_organization_workflow_permissions`, and `github_actions_runner_group`.
+- **`modules/teams/`**: Manages centralized `github_team` resources in two ordered passes (root teams → child teams) and optional explicit memberships.
+- **`modules/domain-repositories/`**: Manages `github_repository` (`archive_on_destroy = true`), modern `github_repository_ruleset` (`~DEFAULT_BRANCH`), `github_team_repository`, `github_repository_environment`, and `github_actions_variable`.
+- **Config-Driven Alignment (`scripts/generate_imports.py` + `scripts/tofu-plan.sh`)**: Generates native `import {}` blocks from `inventory/<org>.inventory.json` so read-only `tofu plan` runs display exact in-place diffs (`~`) against live GitHub during Phase 1 alignment.

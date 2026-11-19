@@ -1,9 +1,17 @@
 {
   "yaml.schemas": {
-    "./schemas/org.schema.json": "config/org.yaml",
-    "./schemas/groups.schema.json": "config/groups.yaml",
-    "./schemas/project.schema.json": [
-      "config/projects/*.yaml",
+    "./schemas/enterprise.schema.json": "config/enterprise.yaml",
+    "./schemas/org.schema.json": [
+      "config/orgs/*/org.yaml",
+      "candidates/*/org.yaml"
+    ],
+    "./schemas/teams.schema.json": [
+      "config/orgs/*/teams.yaml",
+      "candidates/*/teams.yaml"
+    ],
+    "./schemas/domain-repos.schema.json": [
+      "config/orgs/*/repos/*.yaml",
+      "candidates/*/repos/*.yaml",
       ".agents/skills/onboard-project/examples/*.yaml"
     ]
   },
@@ -19,7 +27,6 @@
     "ms-azuretools.vscode-docker",
     "ms-python.python",
     "ms-python.vscode-pylance",
-    "ms-azuretools.vscode-bicep",
     "yzhang.markdown-all-in-one"
   ]
 }

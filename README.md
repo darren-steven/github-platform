@@ -58,6 +58,8 @@ config/
 | Adjust organization-wide security or Actions settings | `config/orgs/<org>/org.yaml` |
 | Inspect enterprise archetypes (`standard-microservice`, `regulated-workload`, `shared-library`, `sandbox`) | [`config/enterprise.yaml`](./config/enterprise.yaml) |
 | Check allowed settings and security limits | [Dials & Baselines Catalog](./docs/dials-catalog.md) |
+| Preview live GitHub drift (read-only OpenTofu plan) | [`environments/taswater/README.md`](./environments/taswater/README.md) (`./scripts/tofu-plan.sh taswater`) |
+| Explore the OpenTofu module engine | [`modules/README.md`](./modules/README.md) |
 | Extract existing GitHub Enterprise config & deduce domains | [GitHub Extraction & Candidate Guide](./docs/github-extraction-guide.md) |
 | Understand the repo layout and pull request workflow | [Contributor & Maintainer Guide](./docs/onboarding-guide.md) |
 | Review the architecture and inheritance model | [Architecture Reference](./ARCHITECTURE.md) |

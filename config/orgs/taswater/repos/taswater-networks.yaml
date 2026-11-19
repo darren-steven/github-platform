@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: taswater-networks
+  name: Taswater Networks Domain
+  description: Repositories aligned to the Taswater Networks domain in taswater.
+  organization: taswater
+defaults:
+  archetype: shared-library
+  topics:
+  - taswater-networks
+  - taswater
+  team_access:
+  - team: taswater-networks
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - taswater-networks
+repositories:
+- name: CiscoWhisper-SSH
+  description: Python Program to ssh into cisco devices
+- name: Dougs809
+  description: Dougs Notes for Cisco IR809 router configs
+  archetype: standard-microservice
+- name: RouterScripts
+  description: This is the collection of EEM scripts for the Network team to manage
+    IR809 routers
+  archetype: standard-microservice
+- name: TW-NetworkTeam
+  description: Dougs Test Repo
+  team_access:
+  - team: spatial-applications
+    permission: push
+  - team: taswater-networks
+    permission: maintain
+- name: TW-Router-Configurations
+  description: This is the TasWater router configurations repository
+- name: TW-Switch-Configurations
+  description: This is the TasWater switch configurations repository

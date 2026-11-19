@@ -12,6 +12,7 @@ enterprise:
   name: "TasWater Enterprise"
   url: "https://github.com/enterprises/taswater"
   managed_organizations:
+    - "taswater"
     - "taswater-core"
     - "taswater-digital"
 

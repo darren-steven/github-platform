@@ -1,0 +1,79 @@
+# yaml-language-server: $schema=../../../schemas/teams.schema.json
+organization: taswater
+teams:
+- slug: bsa
+  name: BSA
+  description: Business Systems Applications
+  privacy: closed
+  role_tier: contributor
+- slug: dataandanalytics
+  name: DataAndAnalytics
+  description: Data and Analytics, part of Digital and Technology Group
+  privacy: closed
+  role_tier: contributor
+- slug: digital-delivery
+  name: Digital Delivery
+  description: GitHub team Digital Delivery
+  privacy: closed
+  role_tier: contributor
+- slug: fusion5
+  name: Fusion5
+  description: GitHub team Fusion5
+  privacy: closed
+  role_tier: contributor
+- slug: gentrack
+  name: Gentrack
+  description: Gentrack SQl and associated Apps
+  privacy: closed
+  role_tier: contributor
+- slug: h2go
+  name: H2GO
+  description: H2GO Project team
+  privacy: closed
+  role_tier: contributor
+- slug: j4rvis
+  name: J4RVIS
+  description: J4RVIS MuleSoft Managed Service Team
+  privacy: closed
+  role_tier: contributor
+  parent_team: digital-delivery
+- slug: maximo
+  name: Maximo
+  description: Maximo Development
+  privacy: closed
+  role_tier: contributor
+- slug: operations-team
+  name: Operations Team
+  description: Operations Team Repos
+  privacy: closed
+  role_tier: contributor
+- slug: ops
+  name: Ops
+  description: Sys admin scripts and other stuff like that
+  privacy: closed
+  role_tier: contributor
+- slug: reporting
+  name: Reporting
+  description: Business Systems Reporting
+  privacy: closed
+  role_tier: contributor
+- slug: scada
+  name: SCADA
+  description: SCADA scripts
+  privacy: closed
+  role_tier: contributor
+- slug: spatial-applications
+  name: Spatial Applications
+  description: Business Systems Applicaitons - Spatial Administrators
+  privacy: closed
+  role_tier: contributor
+- slug: sql
+  name: SQL
+  description: SQL Repository for DBA & Application Support
+  privacy: closed
+  role_tier: contributor
+- slug: taswater-networks
+  name: TasWater-Networks
+  description: Network Team
+  privacy: closed
+  role_tier: contributor

@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=../../../../schemas/domain-repos.schema.json
+domain:
+  key: bsa
+  name: Bsa Domain
+  description: Repositories aligned to the Bsa domain in taswater.
+  organization: taswater
+defaults:
+  archetype: shared-library
+  topics:
+  - bsa
+  - taswater
+  team_access:
+  - team: bsa
+    permission: maintain
+  environments:
+  - name: dev
+    description: Development environment
+    require_approval: false
+  - name: staging
+    description: Staging environment
+    require_approval: false
+  - name: prod
+    description: Production environment
+    require_approval: true
+    approver_teams:
+    - bsa
+repositories:
+- name: Excel
+  description: Excel workbooks & macros
+- name: sdautomator
+  description: Repository sdautomator
+  team_access:
+  - team: bsa
+    permission: maintain
+  - team: operations-team
+    permission: maintain

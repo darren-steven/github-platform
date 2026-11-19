@@ -59,6 +59,8 @@ To support maintainers of varying skill levels safely, all settings are divided 
 | `config/orgs/<org>/repos/<domain>.yaml` | **All Maintainers** | Onboard repositories, set archetypes, map team access, and configure environments. | Granting `admin` team permissions, making repos `public`, or referencing unknown teams. |
 | `schemas/` | **Platform Engineers** | Add or update JSON Schema definitions when exposing a new bounded dial. | Relaxing `minimum`/`maximum`/`enum` security bounds without updating `policies/`. |
 | `policies/` | **Platform Engineers** | Add or update OPA/Conftest Rego policies enforcing enterprise, org, and repo rules. | Deleting or weakening `deny` rules to silence failing checks. |
+| `modules/` | **Platform Engineers** | Author reusable OpenTofu modules (`config-resolver`, `org-baseline`, `teams`, `domain-repositories`). | Weakening Tier 1 HCL validations, disabling `archive_on_destroy`, or omitting module `README.md` files. |
+| `environments/` | **Platform Engineers** | Manage per-organization OpenTofu root stacks and config-driven `imports.tf` alignment. | Running `tofu apply` during Phase 1 plan-only alignment or committing `*.tfstate` files. |
 | `.agents/skills/` | **Platform Engineers** | Author canonical AI skills (`SKILL.md`) shared across Gemini and GitHub Copilot. | Creating legacy `.github/prompts/*.prompt.md` files or tool-specific instructions that drift. |
 
 ---
@@ -70,5 +72,6 @@ Both **Google Gemini (Antigravity)** and **GitHub Copilot** natively discover Ag
 1. **[adjust-org-dial](.agents/skills/adjust-org-dial/SKILL.md)**: Safely inspect and modify an exposed organization, domain, or repository dial in `config/` within schema bounds.
 2. **[onboard-project](.agents/skills/onboard-project/SKILL.md)**: Onboard a new repository, domain group, or team in `config/orgs/<org>/` using an approved repository archetype.
 3. **[create-baseline-dial](.agents/skills/create-baseline-dial/SKILL.md)**: End-to-end platform engineering workflow to expose a new bounded dial across JSON Schema, OPA policy, validation scripts, and documentation.
-4. **[author-azdo-module](.agents/skills/author-azdo-module/SKILL.md)**: Standards for authoring infrastructure modules when backing YAML definitions with OpenTofu/Terraform.
-5. **[explain-policy-failure](.agents/skills/explain-policy-failure/SKILL.md)**: Run `./scripts/validate.sh`, translate schema/OPA/referential errors into plain language, and guide maintainers to a compliant fix.
+4. **[author-github-module](.agents/skills/author-github-module/SKILL.md)**: Standards for authoring GitHub Enterprise Cloud OpenTofu modules in `modules/` and `environments/`.
+5. **[review-terraform-plan](.agents/skills/review-terraform-plan/SKILL.md)**: Guided coaching workflow for running `./scripts/tofu-plan.sh`, interpreting `+`/`~`/`-`/`import` diffs, and aligning drift back into YAML.
+6. **[explain-policy-failure](.agents/skills/explain-policy-failure/SKILL.md)**: Run `./scripts/validate.sh`, translate schema/OPA/referential errors into plain language, and guide maintainers to a compliant fix.

@@ -81,3 +81,42 @@ warn contains msg if {
 		[rg.name],
 	)
 }
+
+# Guardrail 5: Codespaces cannot be enabled without a hard-capped 'codespaces' billing budget
+deny contains msg if {
+	input.organization
+	input.codespaces_dials.enabled == true
+	not has_capped_codespaces_budget
+	msg := "[ORG-FINOPS-001] codespaces_dials.enabled is true, so billing_budgets must include a 'codespaces' budget with prevent_further_usage: true."
+}
+
+has_capped_codespaces_budget if {
+	some b in input.billing_budgets
+	b.product_sku == "codespaces"
+	b.prevent_further_usage == true
+}
+
+# Guardrail 6: Enabled Copilot must have an active seat_management mode and teams when assign_selected
+deny contains msg if {
+	input.organization
+	input.copilot_dials.enabled == true
+	input.copilot_dials.seat_management == "disabled"
+	msg := "[ORG-FINOPS-002] copilot_dials.enabled is true, so copilot_dials.seat_management cannot be 'disabled'."
+}
+
+deny contains msg if {
+	input.organization
+	input.copilot_dials.enabled == true
+	input.copilot_dials.seat_management == "assign_selected"
+	count(input.copilot_dials.assigned_teams) == 0
+	msg := "[ORG-FINOPS-002] copilot_dials.seat_management is 'assign_selected', so copilot_dials.assigned_teams must list at least one team slug."
+}
+
+# Guardrail 7: Enabled Codespaces with selected_members must list allowed_teams
+deny contains msg if {
+	input.organization
+	input.codespaces_dials.enabled == true
+	input.codespaces_dials.access_policy == "selected_members"
+	count(input.codespaces_dials.allowed_teams) == 0
+	msg := "[ORG-FINOPS-002] codespaces_dials.access_policy is 'selected_members', so codespaces_dials.allowed_teams must list at least one team slug."
+}

@@ -492,6 +492,21 @@ def generate_candidates(inventory, include_archived=False):
             },
         },
         "runner_groups": [],
+        "copilot_dials": {
+            "enabled": False,
+            "seat_management": "disabled",
+            "assigned_teams": [],
+            "content_exclusions": [],
+        },
+        "codespaces_dials": {
+            "enabled": False,
+            "access_policy": "disabled",
+            "allowed_teams": [],
+            "allowed_machine_types": ["basicLinux32gb", "standardLinux32gb"],
+            "default_idle_timeout_minutes": 30,
+            "default_retention_period_days": 14,
+        },
+        "billing_budgets": [],
     }
 
     report_md = render_drift_report(

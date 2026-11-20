@@ -46,3 +46,22 @@ runner_groups:
   - name: "taswater-digital-runners"
     visibility: "selected"
     allow_public_repositories: false
+
+# -----------------------------------------------------------------------------
+# Resources & Metered Billing Dials (Opt-In; Disabled by Default)
+# -----------------------------------------------------------------------------
+copilot_dials:
+  enabled: false
+  seat_management: "disabled"
+  assigned_teams: []
+  content_exclusions: []
+codespaces_dials:
+  enabled: false
+  access_policy: "disabled"
+  allowed_teams: []
+  allowed_machine_types:
+    - "basicLinux32gb"
+    - "standardLinux32gb"
+  default_idle_timeout_minutes: 30
+  default_retention_period_days: 14
+billing_budgets: []

@@ -62,3 +62,24 @@ deny contains msg if {
 		[arch_name],
 	)
 }
+
+# Guardrail 5: FinOps ceilings on enterprise Codespaces defaults
+deny contains msg if {
+	input.enterprise
+	cs := input.enterprise_defaults.codespaces
+	cs.max_idle_timeout_minutes > 120
+	msg := sprintf(
+		"[ENT-FINOPS-001] enterprise_defaults.codespaces.max_idle_timeout_minutes (%d) cannot exceed 120 minutes.",
+		[cs.max_idle_timeout_minutes],
+	)
+}
+
+deny contains msg if {
+	input.enterprise
+	cs := input.enterprise_defaults.codespaces
+	cs.max_retention_period_days > 30
+	msg := sprintf(
+		"[ENT-FINOPS-001] enterprise_defaults.codespaces.max_retention_period_days (%d) cannot exceed 30 days.",
+		[cs.max_retention_period_days],
+	)
+}

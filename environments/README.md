@@ -13,6 +13,7 @@ The `integrations/github` provider scopes organization settings, teams, and repo
 
 | Stack | Config Directory | State Mode | Status |
 | :--- | :--- | :--- | :--- |
+| [`enterprise/`](./enterprise/README.md) | [`config/enterprise.yaml`](../config/enterprise.yaml) | Local state (Phase 1 — Enterprise Baseline) | Active |
 | [`taswater/`](./taswater/README.md) | [`config/orgs/taswater/`](../config/orgs/taswater/README.md) | Local state (Phase 1 — Plan-Only Alignment) | Active |
 
 ## Lifecycle Phases

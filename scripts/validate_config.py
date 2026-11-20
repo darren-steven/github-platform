@@ -162,6 +162,22 @@ def main():
             )
 
     managed_orgs = (ent_data or {}).get("enterprise", {}).get("managed_organizations", [])
+    ent_defaults = (ent_data or {}).get("enterprise_defaults") or {}
+    ent_copilot = ent_defaults.get("copilot") or {}
+    ent_codespaces = ent_defaults.get("codespaces") or {}
+    ent_billing = ent_defaults.get("billing") or {}
+    ent_allowed_skus = set(ent_codespaces.get("allowed_machine_types") or [])
+    ent_max_idle = ent_codespaces.get("max_idle_timeout_minutes", 120)
+    ent_max_retention = ent_codespaces.get("max_retention_period_days", 30)
+    ent_max_budget = ent_billing.get("max_org_monthly_budget_usd", 50000)
+
+    for rg in (ent_defaults.get("actions") or {}).get("runner_groups") or []:
+        if isinstance(rg, dict):
+            for sel_org in rg.get("selected_organizations") or []:
+                if sel_org not in managed_orgs:
+                    errors.append(
+                        f"[ENT-RUNNER-ORG] {ent_path}: enterprise runner group '{rg.get('name')}' references unknown managed organization '{sel_org}'"
+                    )
     discovered_org_dirs = sorted(
         os.path.basename(p) for p in glob.glob("config/orgs/*") if os.path.isdir(p)
     )
@@ -244,6 +260,73 @@ def main():
                 elif parent not in team_slugs:
                     errors.append(
                         f"[TEAMS-UNKNOWN-PARENT] {teams_yaml_path}: team '{t.get('slug')}' references unknown parent_team '{parent}'"
+                    )
+
+        # Cross-file FinOps & Enterprise Ceiling checks on org.yaml (Copilot, Codespaces, Budgets)
+        if isinstance(org_data, dict):
+            copilot = org_data.get("copilot_dials") or {}
+            codespaces = org_data.get("codespaces_dials") or {}
+            budgets = org_data.get("billing_budgets") or []
+
+            if copilot.get("enabled") is True:
+                if ent_copilot.get("policy_mode") == "disabled":
+                    errors.append(
+                        f"[ORG-FINOPS-005] {org_yaml_path}: copilot_dials.enabled cannot be true while enterprise_defaults.copilot.policy_mode is 'disabled'."
+                    )
+                if copilot.get("seat_management") == "disabled":
+                    errors.append(
+                        f"[ORG-FINOPS-002] {org_yaml_path}: copilot_dials.enabled is true, so seat_management cannot be 'disabled'."
+                    )
+                if copilot.get("seat_management") == "assign_selected" and not (copilot.get("assigned_teams") or []):
+                    errors.append(
+                        f"[ORG-FINOPS-002] {org_yaml_path}: copilot_dials.seat_management is 'assign_selected' and requires at least one team in assigned_teams."
+                    )
+            for tslug in copilot.get("assigned_teams") or []:
+                if tslug not in team_slugs:
+                    errors.append(
+                        f"[ORG-FINOPS-003] {org_yaml_path}: copilot_dials.assigned_teams references unknown team slug '{tslug}' (not in {teams_yaml_path})."
+                    )
+
+            if codespaces.get("enabled") is True:
+                if ent_codespaces.get("policy_mode") == "disabled":
+                    errors.append(
+                        f"[ORG-FINOPS-005] {org_yaml_path}: codespaces_dials.enabled cannot be true while enterprise_defaults.codespaces.policy_mode is 'disabled'."
+                    )
+                if codespaces.get("access_policy") == "selected_members" and not (codespaces.get("allowed_teams") or []):
+                    errors.append(
+                        f"[ORG-FINOPS-002] {org_yaml_path}: codespaces_dials.access_policy is 'selected_members' and requires at least one team in allowed_teams."
+                    )
+                has_cs_cap = any(
+                    isinstance(b, dict) and b.get("product_sku") == "codespaces" and b.get("prevent_further_usage") is True
+                    for b in budgets
+                )
+                if not has_cs_cap:
+                    errors.append(
+                        f"[ORG-FINOPS-001] {org_yaml_path}: codespaces_dials.enabled is true, so billing_budgets must define a 'codespaces' budget with prevent_further_usage: true."
+                    )
+            for tslug in codespaces.get("allowed_teams") or []:
+                if tslug not in team_slugs:
+                    errors.append(
+                        f"[ORG-FINOPS-003] {org_yaml_path}: codespaces_dials.allowed_teams references unknown team slug '{tslug}' (not in {teams_yaml_path})."
+                    )
+            for sku in codespaces.get("allowed_machine_types") or []:
+                if ent_allowed_skus and sku not in ent_allowed_skus:
+                    errors.append(
+                        f"[ORG-FINOPS-004] {org_yaml_path}: codespaces_dials.allowed_machine_types includes '{sku}', which is not permitted by enterprise_defaults.codespaces.allowed_machine_types."
+                    )
+            if codespaces.get("default_idle_timeout_minutes", 0) > ent_max_idle:
+                errors.append(
+                    f"[ORG-FINOPS-004] {org_yaml_path}: codespaces_dials.default_idle_timeout_minutes exceeds enterprise ceiling ({ent_max_idle})."
+                )
+            if codespaces.get("default_retention_period_days", 0) > ent_max_retention:
+                errors.append(
+                    f"[ORG-FINOPS-004] {org_yaml_path}: codespaces_dials.default_retention_period_days exceeds enterprise ceiling ({ent_max_retention})."
+                )
+
+            for b in budgets:
+                if isinstance(b, dict) and b.get("budget_amount_usd", 0) > ent_max_budget:
+                    errors.append(
+                        f"[ORG-FINOPS-004] {org_yaml_path}: billing_budgets entry for '{b.get('product_sku')}' (${b.get('budget_amount_usd')}) exceeds enterprise max_org_monthly_budget_usd (${ent_max_budget})."
                     )
 
         # Validate domain repository files in config/orgs/<org>/repos/*.yaml

@@ -65,3 +65,35 @@ This catalog documents every governance control managed in `config/`, classified
 | `repositories[].required_status_checks` | `array<string>` | Non-empty strings | CI status check contexts required to pass before merging to `main`. |
 | `repositories[].codeowners_teams` | `array` | Valid path (`/...`) + team slugs in `teams.yaml` | Path-scoped CODEOWNERS team review rules. |
 | `defaults.environments` / `repositories[].environments` | `array` | `prod` requires `require_approval: true` & `approver_teams` | Configures deployment environments (`dev`, `staging`, `prod`) and required reviewer teams. |
+
+---
+
+## 4. Enterprise Defaults, Resources & FinOps Dials (`config/enterprise.yaml` & `config/orgs/<org>/org.yaml`)
+
+> **Approval Requirement**: Changes to `config/enterprise.yaml` or `config/orgs/<org>/org.yaml` require **Platform Admin** approval.
+
+### Enterprise Policy Ceilings (`config/enterprise.yaml` → `enterprise_defaults`)
+
+| YAML Path | Type | Default | Allowed Bounds / Guardrail | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `enterprise_defaults.actions.allowed_actions` | `string` | `"selected"` | `"selected"`, `"local_only"` | Enterprise default policy restricting reusable GitHub Actions. |
+| `enterprise_defaults.actions.runner_groups` | `array` | `[]` | `allow_public_repositories: false` (Tier 1) | Shared enterprise Actions runner groups scoped to managed organizations. |
+| `enterprise_defaults.copilot.policy_mode` | `string` | `"enabled_for_selected_orgs"` | `"disabled"`, `"enabled_for_selected_orgs"`, `"enabled_for_all_orgs"` | Controls whether organizations may opt into GitHub Copilot (`ORG-FINOPS-005`). |
+| `enterprise_defaults.copilot.public_code_suggestions` | `string` | `"block"` | `"block"`, `"allow"` | IP compliance default for public-code matching suggestions. |
+| `enterprise_defaults.codespaces.policy_mode` | `string` | `"enabled_for_selected_orgs"` | `"disabled"`, `"enabled_for_selected_orgs"` | Controls whether organizations may opt into GitHub Codespaces (`ORG-FINOPS-005`). |
+| `enterprise_defaults.codespaces.max_idle_timeout_minutes` | `integer` | `60` | `15` .. `120` (`ENT-FINOPS-001`) | Maximum idle timeout ceiling inherited by all organizations. |
+| `enterprise_defaults.codespaces.max_retention_period_days` | `integer` | `14` | `1` .. `30` (`ENT-FINOPS-001`) | Maximum retention ceiling inherited by all organizations. |
+| `enterprise_defaults.codespaces.allowed_machine_types` | `array` | `["basicLinux32gb", "standardLinux32gb"]` | Approved SKU allowlist (`ORG-FINOPS-004`) | Compute SKUs organizations are permitted to offer. |
+| `enterprise_defaults.billing.max_org_monthly_budget_usd` | `integer` | `5000` | `100` .. `50000` (`ORG-FINOPS-004`) | Upper USD ceiling for any single per-organization monthly budget entry. |
+
+### Per-Organization Resources & Billing Dials (`config/orgs/<org>/org.yaml`)
+
+| YAML Path | Type | Default | Guardrails Enforced | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `copilot_dials.enabled` | `boolean` | `false` | `ORG-FINOPS-002`, `ORG-FINOPS-005` | Opt-in toggle for GitHub Copilot in the organization. |
+| `copilot_dials.seat_management` | `string` | `"disabled"` | `"disabled"`, `"assign_selected"`, `"assign_all"` | Controls team-based seat allocation (`assign_selected` requires `assigned_teams`). |
+| `copilot_dials.assigned_teams` | `array` | `[]` | Valid team slugs in `teams.yaml` (`ORG-FINOPS-003`) | Governed teams granted Copilot seats. |
+| `codespaces_dials.enabled` | `boolean` | `false` | Requires capped `codespaces` budget (`ORG-FINOPS-001`) | Opt-in toggle for GitHub Codespaces in the organization. |
+| `codespaces_dials.allowed_teams` | `array` | `[]` | Valid team slugs in `teams.yaml` (`ORG-FINOPS-003`) | Governed teams allowed to create organization-billed Codespaces. |
+| `codespaces_dials.allowed_machine_types` | `array` | `["basicLinux32gb", "standardLinux32gb"]` | Subset of enterprise SKUs (`ORG-FINOPS-004`) | Permitted Codespaces machine types for this org. |
+| `billing_budgets[]` | `array` | `[]` | `product_sku` in `actions`/`codespaces`/`copilot`/`packages`; `<= max_org_monthly_budget_usd` | Per-organization metered monthly budgets with `prevent_further_usage` and `alert_recipients`. |

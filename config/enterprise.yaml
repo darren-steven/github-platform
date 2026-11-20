@@ -25,6 +25,29 @@ security_settings:
   members_can_create_public_repositories: false
 
 # -----------------------------------------------------------------------------
+# Enterprise Defaults, Policy Ceilings & FinOps Guardrails
+# -----------------------------------------------------------------------------
+# Organizations inherit these defaults and cannot exceed these ceilings in
+# config/orgs/<org>/org.yaml.
+enterprise_defaults:
+  actions:
+    allowed_actions: "selected"
+    runner_groups: []
+  copilot:
+    policy_mode: "enabled_for_selected_orgs"
+    public_code_suggestions: "block"
+    cli_and_chat_enabled: true
+  codespaces:
+    policy_mode: "enabled_for_selected_orgs"
+    max_idle_timeout_minutes: 60
+    max_retention_period_days: 14
+    allowed_machine_types:
+      - "basicLinux32gb"
+      - "standardLinux32gb"
+  billing:
+    max_org_monthly_budget_usd: 5000
+
+# -----------------------------------------------------------------------------
 # Reusable Repository Governance Archetypes
 # -----------------------------------------------------------------------------
 archetypes:

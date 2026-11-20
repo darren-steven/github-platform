@@ -30,6 +30,7 @@ flowchart LR
 | Module | Responsibility | Resources Managed |
 | :--- | :--- | :--- |
 | [`config-resolver/`](./config-resolver/README.md) | Loads YAML files and resolves the 4-layer inheritance hierarchy (`Enterprise Archetype` → `Org` → `Domain` → `Repository`). | None (pure HCL data transformation). |
+| [`enterprise-baseline/`](./enterprise-baseline/README.md) | Manages Enterprise-scoped resources and policy ceiling summaries from `config/enterprise.yaml`. | `data.github_enterprise`, `github_enterprise_actions_runner_group` |
 | [`org-baseline/`](./org-baseline/README.md) | Applies organization-wide security dials, GitHub Actions token policies, and runner groups. | `github_organization_settings`, `github_actions_organization_permissions`, `github_actions_runner_group` |
 | [`teams/`](./teams/README.md) | Creates centralized GitHub Teams in two passes (root teams, then child teams) and manages memberships. | `github_team`, `github_team_membership` |
 | [`domain-repositories/`](./domain-repositories/README.md) | Provisions repositories, modern Repository Rulesets, team permissions, deployment environments, and non-sensitive Actions variables. | `github_repository`, `github_repository_ruleset`, `github_team_repository`, `github_repository_environment`, `github_actions_variable` |

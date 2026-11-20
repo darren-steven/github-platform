@@ -10,7 +10,10 @@
     "security_dials",
     "actions_dials",
     "repository_defaults",
-    "runner_groups"
+    "runner_groups",
+    "copilot_dials",
+    "codespaces_dials",
+    "billing_budgets"
   ],
   "properties": {
     "organization": {
@@ -288,6 +291,168 @@
             ],
             "default": false,
             "description": "Tier 1 Baseline: Public repositories can never use organization runner groups."
+          }
+        }
+      }
+    },
+    "copilot_dials": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Organization-level GitHub Copilot seat management and content exclusion dials (opt-in; disabled by default).",
+      "required": [
+        "enabled",
+        "seat_management",
+        "assigned_teams"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Dial: Enable GitHub Copilot for this organization (Default: false)."
+        },
+        "seat_management": {
+          "type": "string",
+          "enum": [
+            "disabled",
+            "assign_selected",
+            "assign_all"
+          ],
+          "default": "disabled",
+          "description": "Dial: How Copilot seats are allocated ('assign_selected' grants seats via governed teams in teams.yaml)."
+        },
+        "assigned_teams": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,62}$"
+          },
+          "description": "Team slugs from teams.yaml granted GitHub Copilot seats when seat_management is 'assign_selected'."
+        },
+        "content_exclusions": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string",
+            "minLength": 2
+          },
+          "description": "Optional repository or file path patterns excluded from Copilot context."
+        }
+      }
+    },
+    "codespaces_dials": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Organization-level GitHub Codespaces access, compute SKU, and timeout dials (opt-in; disabled by default).",
+      "required": [
+        "enabled",
+        "access_policy",
+        "allowed_teams",
+        "allowed_machine_types",
+        "default_idle_timeout_minutes",
+        "default_retention_period_days"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Dial: Enable GitHub Codespaces for this organization (requires a codespaces billing budget when true)."
+        },
+        "access_policy": {
+          "type": "string",
+          "enum": [
+            "disabled",
+            "selected_members",
+            "all_members"
+          ],
+          "default": "disabled",
+          "description": "Dial: Who may create organization-billed Codespaces."
+        },
+        "allowed_teams": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{1,62}$"
+          },
+          "description": "Team slugs from teams.yaml permitted to create Codespaces when access_policy is 'selected_members'."
+        },
+        "allowed_machine_types": {
+          "type": "array",
+          "default": [
+            "basicLinux32gb",
+            "standardLinux32gb"
+          ],
+          "items": {
+            "type": "string",
+            "enum": [
+              "basicLinux32gb",
+              "standardLinux32gb",
+              "premiumLinux",
+              "largePremiumLinux"
+            ]
+          },
+          "description": "Allowed Codespaces compute SKUs (must be a subset of enterprise_defaults.codespaces.allowed_machine_types)."
+        },
+        "default_idle_timeout_minutes": {
+          "type": "integer",
+          "minimum": 15,
+          "maximum": 60,
+          "default": 30,
+          "description": "Dial: Default idle timeout in minutes before Codespaces auto-stop (15..60)."
+        },
+        "default_retention_period_days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30,
+          "default": 14,
+          "description": "Dial: Default days an unused Codespace is retained before automatic deletion (1..30)."
+        }
+      }
+    },
+    "billing_budgets": {
+      "type": "array",
+      "default": [],
+      "description": "Per-organization metered billing budgets and spending caps (no cost centers required).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "product_sku",
+          "budget_amount_usd",
+          "prevent_further_usage",
+          "alert_recipients"
+        ],
+        "properties": {
+          "product_sku": {
+            "type": "string",
+            "enum": [
+              "actions",
+              "codespaces",
+              "copilot",
+              "packages"
+            ],
+            "description": "Metered GitHub product SKU governed by this budget."
+          },
+          "budget_amount_usd": {
+            "type": "integer",
+            "minimum": 10,
+            "maximum": 50000,
+            "description": "Monthly spending cap in USD (bounded by enterprise_defaults.billing.max_org_monthly_budget_usd)."
+          },
+          "prevent_further_usage": {
+            "type": "boolean",
+            "default": true,
+            "description": "FinOps Guardrail: Halt metered usage automatically when the monthly budget is reached."
+          },
+          "alert_recipients": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 2
+            },
+            "description": "GitHub usernames or email addresses notified as budget thresholds are crossed."
           }
         }
       }

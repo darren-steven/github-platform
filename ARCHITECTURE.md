@@ -74,6 +74,7 @@ Every change to `config/` passes through four automated verification gates befor
 
 Validated YAML configurations in `config/` are consumed by a modular OpenTofu (`>= 1.8.0`) backend powered by the `integrations/github` (`~> 6.6`) provider:
 
+- **`environments/enterprise/`**: Dedicated Enterprise-scoped root stack (`modules/enterprise-baseline/`) managing native enterprise resources and surfacing `enterprise_defaults` (Actions, Copilot, Codespaces, and FinOps ceilings) separately from org-scoped tokens.
 - **`environments/<org>/`**: One isolated root stack per GitHub Organization (starting with [`environments/taswater/`](./environments/taswater/README.md)), isolating blast radius and state files.
 - **`modules/config-resolver/`**: Pure-HCL transformation layer that decodes `enterprise.yaml`, `org.yaml`, `teams.yaml`, and `repos/*.yaml` and merges the 4-layer inheritance hierarchy.
 - **`modules/org-baseline/`**: Manages `github_organization_settings`, `github_actions_organization_permissions`, `github_actions_organization_workflow_permissions`, and `github_actions_runner_group`.

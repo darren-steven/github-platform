@@ -51,13 +51,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Dump Env
+        run: env
+
       - name: Create GitHub App installation token
         id: github-app-token
         uses: actions/create-github-app-token@v2
         with:
           app-id: ${{ secrets.GITHUB_APP_ID }}
           private-key: ${{ secrets.GITHUB_APP_PRIVATE_KEY }}
-          owner: taswater
+          owner: TasWater
 
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v1

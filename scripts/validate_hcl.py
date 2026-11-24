@@ -98,7 +98,7 @@ def main() -> int:
             text=True,
         )
         if fmt_proc.returncode != 0:
-            print(f"WARN: HCL formatting check failed (`{os.path.basename(tf_bin)} fmt -recursive modules environments`):\n{fmt_proc.stdout.strip()}")          )
+            print(f"WARN: HCL formatting check failed (`{os.path.basename(tf_bin)} fmt -recursive modules environments`):\n{fmt_proc.stdout.strip()}")
 
     if errors:
         for err in errors:

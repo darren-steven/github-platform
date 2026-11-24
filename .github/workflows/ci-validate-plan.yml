@@ -1,4 +1,4 @@
-name: "AzDo-IaC Validate & OpenTofu Plan"
+name: "GitHub IaC Validate & OpenTofu Plan"
 
 on:
   pull_request:
@@ -35,23 +35,29 @@ jobs:
         run: ./scripts/validate.sh
 
   opentofu-plan:
-    name: "2. OpenTofu Plan (Azure DevOps Org)"
+    name: "2. OpenTofu Plan (taswater GitHub Org)"
     needs: validate-guardrails
     runs-on: ubuntu-latest
-    # Only run plan when enabled AND never on pull requests originating from external forks
+    # Only run plan when enabled and never expose the app key to external forks.
     if: >-
-      vars.AZDO_CONTROL_PLANE_ENABLED == 'true' &&
+      vars.TOFU_PLAN_ENABLED == 'true' &&
       (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
-      id-token: write
-      pull-requests: write
     defaults:
       run:
-        working-directory: environments/prod-org
+        working-directory: environments/taswater
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Create GitHub App installation token
+        id: github-app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.GITHUB_APP_ID }}
+          private-key: ${{ secrets.GITHUB_APP_PRIVATE_KEY }}
+          owner: taswater
 
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v1
@@ -59,13 +65,16 @@ jobs:
           tofu_version: "1.8.2"
 
       - name: OpenTofu Init
+        env:
+          GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
         run: tofu init
 
       - name: OpenTofu Validate
+        env:
+          GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
         run: tofu validate
 
       - name: OpenTofu Plan
         env:
-          AZDO_ORG_SERVICE_URL: ${{ vars.AZDO_ORG_SERVICE_URL }}
-          AZDO_PERSONAL_ACCESS_TOKEN: ${{ secrets.AZDO_PERSONAL_ACCESS_TOKEN }}
-        run: tofu plan -out=tfplan
+          GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
+        run: tofu plan -input=false -no-color

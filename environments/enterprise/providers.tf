@@ -4,4 +4,6 @@
 # Uses GITHUB_TOKEN from shell memory (never hardcoded).
 # =============================================================================
 
-provider "github" {}
+provider "github" {
+  owner = module.config.enterprise.enterprise.slug
+}

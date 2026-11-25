@@ -17,7 +17,8 @@ locals {
   org_raw        = yamldecode(file("${var.org_config_dir}/org.yaml"))
   teams_raw      = yamldecode(file("${var.org_config_dir}/teams.yaml"))
 
-  archetypes = local.enterprise_raw.archetypes
+  archetypes        = local.enterprise_raw.archetypes
+  enterprise_defaults = local.enterprise_raw.enterprise_defaults
 
   # Normalize teams into a map keyed by immutable team slug for for_each usage.
   teams_by_slug = {
@@ -98,6 +99,15 @@ locals {
           local.archetypes[coalesce(try(repo.archetype, null), try(domain_doc.defaults.archetype, null), local.org_raw.organization.default_archetype)].security,
           try(repo.security, {})
         )
+
+        # JIRA autolinks are opt-in per repository; use the repo URL override or enterprise default.
+        jira_autolink = try(repo.jira_autolink, null) == null ? null : {
+          project_key = repo.jira_autolink.project_key
+          browse_url = coalesce(
+            try(repo.jira_autolink.browse_url, null),
+            local.enterprise_defaults.jira_autolink.browse_url
+          )
+        }
 
         required_status_checks = try(repo.required_status_checks, [])
 

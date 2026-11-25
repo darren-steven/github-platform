@@ -3,7 +3,8 @@
 
 Queries the GitHub REST API (using GITHUB_TOKEN / GH_TOKEN or `gh auth token`)
 to capture a point-in-time JSON snapshot of an organization's settings, teams,
-repositories, team permissions, branch protections, and deployment environments.
+repositories, team permissions, branch protections, deployment environments,
+and repository autolink references.
 """
 
 import argparse
@@ -74,11 +75,15 @@ class GitHubReadOnlyClient:
                 return None
             raise
 
-    def get_paginated(self, path, list_key=None):
+    def get_paginated(self, path, list_key=None, allow_optional_errors=True):
         items = []
         page = 1
         while True:
-            data = self.get_json(path, params={"per_page": 100, "page": page}, allow_404=True)
+            data = self.get_json(
+                path,
+                params={"per_page": 100, "page": page},
+                allow_404=allow_optional_errors,
+            )
             if not data:
                 break
             batch = data.get(list_key, []) if list_key and isinstance(data, dict) else data
@@ -232,6 +237,24 @@ def export_organization_inventory(client, org_slug):
                 }
             )
 
+        autolinks_raw = client.get_paginated(
+            f"/repos/{org_slug}/{rname}/autolinks",
+            allow_optional_errors=False,
+        )
+        autolinks = sorted(
+            [
+                {
+                    "id": int(autolink["id"]),
+                    "key_prefix": autolink["key_prefix"],
+                    "url_template": autolink["url_template"],
+                    "is_alphanumeric": bool(autolink.get("is_alphanumeric", True)),
+                }
+                for autolink in autolinks_raw
+                if isinstance(autolink, dict)
+            ],
+            key=lambda autolink: autolink["key_prefix"],
+        )
+
         repositories.append(
             {
                 "name": rname,
@@ -257,6 +280,7 @@ def export_organization_inventory(client, org_slug):
                 "security": security,
                 "team_permissions": team_permissions,
                 "environments": environments,
+                "autolinks": autolinks,
             }
         )
 

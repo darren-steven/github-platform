@@ -39,6 +39,27 @@ def hcl_quote(value: str) -> str:
     return f'"{escaped}"'
 
 
+def jira_autolink_import_blocks(repo_name: str, jira_config: dict, live_autolinks: list | None) -> list:
+    """Return an import block when the configured Jira prefix already exists live."""
+    if not jira_config:
+        return []
+
+    key_prefix = f"{jira_config['project_key']}-"
+    if not any(
+        isinstance(autolink, dict) and autolink.get("key_prefix") == key_prefix
+        for autolink in live_autolinks or []
+    ):
+        return []
+
+    return [
+        "import {",
+        f"  to = module.repositories.github_repository_autolink_reference.jira[{hcl_quote(repo_name)}]",
+        f"  id = {hcl_quote(f'{repo_name}/{key_prefix}')}",
+        "}",
+        "",
+    ]
+
+
 def generate_imports(org_slug: str) -> int:
     inv_path = REPO_ROOT / "inventory" / f"{org_slug}.inventory.json"
     config_dir = REPO_ROOT / "config" / "orgs" / org_slug
@@ -79,7 +100,21 @@ def generate_imports(org_slug: str) -> int:
             eff_ta = repo.get("team_access") if repo.get("team_access") else default_team_access
             declared_repos[rname] = {
                 "team_access": eff_ta,
+                "jira_autolink": repo.get("jira_autolink"),
             }
+
+    for rname, repo_config in declared_repos.items():
+        if (
+            repo_config["jira_autolink"]
+            and rname in live_repos
+            and "autolinks" not in live_repos[rname]
+        ):
+            print(
+                f"ERROR: Inventory for '{rname}' predates autolink export. "
+                "Re-export the organization inventory before generating imports.",
+                file=sys.stderr,
+            )
+            return 1
 
     lines = [
         "# =============================================================================",
@@ -143,6 +178,7 @@ def generate_imports(org_slug: str) -> int:
 
     repo_count = 0
     team_repo_count = 0
+    jira_autolink_count = 0
     team_repo_lines = [
         "# -----------------------------------------------------------------------------",
         "# Existing Team-to-Repository Permission Links",
@@ -167,6 +203,15 @@ def generate_imports(org_slug: str) -> int:
                 "",
             ]
         )
+
+        autolink_import = jira_autolink_import_blocks(
+            rname,
+            declared_repos[rname]["jira_autolink"],
+            live_repos[rname].get("autolinks", []),
+        )
+        if autolink_import:
+            lines.extend(autolink_import)
+            jira_autolink_count += 1
 
         # Import team-repo permission links that already exist on the live repository
         live_perms = live_repos[rname].get("team_permissions") or []
@@ -197,7 +242,8 @@ def generate_imports(org_slug: str) -> int:
     out_path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
     print(
         f"  PASS: Generated {out_path.relative_to(REPO_ROOT)} "
-        f"({team_count} teams, {repo_count} repositories, {team_repo_count} team-repo links)."
+        f"({team_count} teams, {repo_count} repositories, {team_repo_count} team-repo links, "
+        f"{jira_autolink_count} Jira autolinks)."
     )
     return 0
 

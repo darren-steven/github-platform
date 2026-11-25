@@ -83,3 +83,11 @@ deny contains msg if {
 		[cs.max_retention_period_days],
 	)
 }
+
+deny contains msg if {
+	input.enterprise
+	url := input.enterprise_defaults.jira_autolink.browse_url
+	is_string(url)
+	not regex.match("^https://[^/@?#]+(/[^?#]*)?$", url)
+	msg := "[ENT-JIRA-001] enterprise_defaults.jira_autolink.browse_url must be a valid HTTPS URL without user information."
+}

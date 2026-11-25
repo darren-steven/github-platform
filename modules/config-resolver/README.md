@@ -9,6 +9,11 @@ A **pure-HCL data transformation module** (creates zero GitHub resources) that l
 3. **Domain Defaults** (`config/orgs/<org>/repos/<domain>.yaml` → `defaults`)
 4. **Repository Overrides** (`config/orgs/<org>/repos/<domain>.yaml` → `repositories[*]`)
 
+Jira autolinks are deliberately opt-in per repository: the shared
+`enterprise_defaults.jira_autolink.browse_url` is used only when a repository
+sets `jira_autolink.project_key`, and a repository `browse_url` overrides the
+shared URL.
+
 ## Inputs
 
 | Name | Type | Description |
@@ -23,5 +28,5 @@ A **pure-HCL data transformation module** (creates zero GitHub resources) that l
 | `enterprise` | Decoded enterprise metadata and security settings. |
 | `org` | Decoded organization metadata, `security_dials`, `actions_dials`, `repository_defaults`, and `runner_groups`. |
 | `teams` | Normalized map of GitHub Teams keyed by team `slug`. |
-| `repositories` | Fully merged map of repositories across all domain files, keyed by repository `name`. |
+| `repositories` | Fully merged map of repositories across all domain files, keyed by repository `name`; includes an optional Jira autolink resolved from the enterprise browse URL and repository override. |
 | `summary` | High-level counts (`team_count`, `domain_count`, `repository_count`) for quick plan verification. |

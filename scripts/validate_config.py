@@ -7,6 +7,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 try:
     import yaml
@@ -126,6 +127,23 @@ def validate_environments(envs, team_slugs, file_label, scope_label):
                 )
 
 
+def validate_jira_browse_url(url, file_label, scope_label):
+    if not isinstance(url, str) or not url:
+        return
+    parsed = urlparse(url)
+    if (
+        parsed.scheme != "https"
+        or not parsed.hostname
+        or parsed.username
+        or parsed.password
+        or parsed.query
+        or parsed.fragment
+    ):
+        errors.append(
+            f"[JIRA-AUTOLINK-URL] {file_label} ({scope_label}): browse_url must be a valid HTTPS URL without a query string or fragment"
+        )
+
+
 def main():
     enterprise_schema = load_json("schemas/enterprise.schema.json")
     org_schema = load_json("schemas/org.schema.json")
@@ -140,6 +158,17 @@ def main():
 
     ent_data = load_yaml(ent_path)
     validate_against_schema(ent_data, enterprise_schema, ent_path)
+    ent_defaults = (ent_data or {}).get("enterprise_defaults") or {}
+    ent_jira = {}
+    if isinstance(ent_defaults, dict):
+        ent_jira = ent_defaults.get("jira_autolink") or {}
+        if not isinstance(ent_jira, dict):
+            ent_jira = {}
+    validate_jira_browse_url(
+        ent_jira.get("browse_url"),
+        ent_path,
+        "enterprise_defaults.jira_autolink.browse_url",
+    )
 
     archetypes = (ent_data or {}).get("archetypes", {})
     for arch_name, arch in archetypes.items():
@@ -420,6 +449,22 @@ def main():
                                 )
 
                 validate_environments(repo.get("environments"), team_slugs, df, f"repo '{rname}'")
+
+                jira_autolink = repo.get("jira_autolink")
+                if isinstance(jira_autolink, dict):
+                    project_key = jira_autolink.get("project_key")
+                    if project_key and (
+                        not isinstance(project_key, str)
+                        or not re.fullmatch(r"[A-Z][A-Z0-9]{1,9}", project_key)
+                    ):
+                        errors.append(
+                            f"[REPO-JIRA-001] {df} (repo '{rname}'): jira_autolink.project_key must be 2-10 uppercase letters/digits and start with a letter"
+                        )
+                    validate_jira_browse_url(
+                        jira_autolink.get("browse_url"),
+                        df,
+                        f"repo '{rname}' jira_autolink.browse_url",
+                    )
 
                 for vkey in (repo.get("environment_variables") or {}).keys():
                     ukey = vkey.upper()

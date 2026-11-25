@@ -47,6 +47,11 @@ variable "repositories" {
       code_scanning_default_setup     = bool
     })
 
+    jira_autolink = object({
+      project_key = string
+      browse_url  = string
+    })
+
     required_status_checks = list(string)
 
     team_access = list(object({

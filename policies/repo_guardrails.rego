@@ -117,3 +117,32 @@ deny contains msg if {
 		[repo.name, input.domain.key, var_key, pattern],
 	)
 }
+
+deny contains msg if {
+	input.domain
+	some repo in input.repositories
+	jira := object.get(repo, "jira_autolink", null)
+	jira != null
+	key := object.get(jira, "project_key", "")
+	is_string(key)
+	not regex.match("^[A-Z][A-Z0-9]{1,9}$", key)
+	msg := sprintf(
+		"[REPO-JIRA-001] Repository '%s' (domain '%s') jira_autolink.project_key must be 2-10 uppercase letters/digits and start with a letter.",
+		[repo.name, input.domain.key],
+	)
+}
+
+deny contains msg if {
+	input.domain
+	some repo in input.repositories
+	jira := object.get(repo, "jira_autolink", null)
+	jira != null
+	url := object.get(jira, "browse_url", "")
+	is_string(url)
+	url != ""
+	not regex.match("^https://[^/@?#]+(/[^?#]*)?$", url)
+	msg := sprintf(
+		"[REPO-JIRA-002] Repository '%s' (domain '%s') jira_autolink.browse_url must be a valid HTTPS URL without user information.",
+		[repo.name, input.domain.key],
+	)
+}

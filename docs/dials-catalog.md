@@ -65,6 +65,17 @@ This catalog documents every governance control managed in `config/`, classified
 | `repositories[].required_status_checks` | `array<string>` | Non-empty strings | CI status check contexts required to pass before merging to `main`. |
 | `repositories[].codeowners_teams` | `array` | Valid path (`/...`) + team slugs in `teams.yaml` | Path-scoped CODEOWNERS team review rules. |
 | `defaults.environments` / `repositories[].environments` | `array` | `prod` requires `require_approval: true` & `approver_teams` | Configures deployment environments (`dev`, `staging`, `prod`) and required reviewer teams. |
+| `repositories[].jira_autolink.project_key` | `string` | 2-10 uppercase letters/digits, begins with a letter | Opts this repository into a Jira autolink; e.g. `PPLCTNS` makes `PPLCTNS-23` link to Jira. |
+| `repositories[].jira_autolink.browse_url` | `string` | Optional HTTPS URL without query/fragment | Overrides the shared Jira browse URL prefix for this repository. |
+
+Example:
+
+```yaml
+jira_autolink:
+  project_key: PPLCTNS
+```
+
+The generated link uses `https://taswater-applications.atlassian.net/browse/PPLCTNS-<num>` by default. Jira autolinks are disabled for repositories without `jira_autolink.project_key`.
 
 ---
 
@@ -85,6 +96,7 @@ This catalog documents every governance control managed in `config/`, classified
 | `enterprise_defaults.codespaces.max_retention_period_days` | `integer` | `14` | `1` .. `30` (`ENT-FINOPS-001`) | Maximum retention ceiling inherited by all organizations. |
 | `enterprise_defaults.codespaces.allowed_machine_types` | `array` | `["basicLinux32gb", "standardLinux32gb"]` | Approved SKU allowlist (`ORG-FINOPS-004`) | Compute SKUs organizations are permitted to offer. |
 | `enterprise_defaults.billing.max_org_monthly_budget_usd` | `integer` | `5000` | `100` .. `50000` (`ORG-FINOPS-004`) | Upper USD ceiling for any single per-organization monthly budget entry. |
+| `enterprise_defaults.jira_autolink.browse_url` | `string` | `"https://taswater-applications.atlassian.net/browse"` | HTTPS URL without query/fragment | Shared Jira browse URL prefix; does not enable autolinks by itself. |
 
 ### Per-Organization Resources & Billing Dials (`config/orgs/<org>/org.yaml`)
 

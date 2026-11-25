@@ -11,6 +11,10 @@ Provisions and governs GitHub repositories across all domain files (`config/orgs
 | [`team_access.tf`](./team_access.tf) | Least-privilege team permission assignments (`pull`, `triage`, `push`, `maintain`). | `github_team_repository` |
 | [`environments.tf`](./environments.tf) | Deployment environments (`dev`, `staging`, `prod`), reviewer gates, and branch policies. | `github_repository_environment` |
 | [`actions_variables.tf`](./actions_variables.tf) | Non-sensitive repository GitHub Actions variables. | `github_actions_variable` |
+| [`autolinks.tf`](./autolinks.tf) | Optional per-repository Jira issue references using an enterprise default or repository-specific browse URL. | `github_repository_autolink_reference` |
+
+The `resource_counts` output includes `jira_autolinks` for the number of enabled
+repository references.
 
 ## Tier 1 Safeguards Enforced in HCL
 
@@ -23,3 +27,16 @@ Provisions and governs GitHub repositories across all domain files (`config/orgs
 
 - **`codeowners_teams`**: Validated in YAML and passed through `config-resolver`. Managing `.github/CODEOWNERS` commits via `github_repository_file` is intentionally deferred until after initial plan-only alignment so no unexpected commits are proposed across existing repositories.
 - **`security.code_scanning_default_setup`**: Tracked in YAML and enforced via GitHub Advanced Security org/repo configuration policies.
+- **`jira_autolink.project_key`**: Opts a repository into a Jira autolink. The module generates a numeric issue reference using the enterprise `browse_url` default or the repository override.
+- **Permissions**: The GitHub App used for planning/managing autolinks needs repository `Administration` permission; use the least level that supports the operation (read to inspect, write to manage).
+
+Example opt-in:
+
+```yaml
+jira_autolink:
+  project_key: PPLCTNS
+  # Optional; defaults to enterprise_defaults.jira_autolink.browse_url
+  browse_url: https://taswater-applications.atlassian.net/browse
+```
+
+This config generates `key_prefix = "PPLCTNS-"` and a target URL template ending in `/PPLCTNS-<num>`, so `PPLCTNS-23` links to the Jira issue.

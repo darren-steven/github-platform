@@ -44,6 +44,8 @@ enterprise_defaults:
       - "standardLinux32gb"
   billing:
     max_org_monthly_budget_usd: 5000
+  jira_autolink:
+    browse_url: "https://taswater-applications.atlassian.net/browse"
 
 # -----------------------------------------------------------------------------
 # Reusable Repository Governance Archetypes

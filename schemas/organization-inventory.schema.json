@@ -263,6 +263,35 @@
               }
             }
           },
+          "autolinks": {
+            "type": "array",
+            "default": [],
+            "description": "Optional snapshot of repository autolink references. Older inventory snapshots may omit this field.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "key_prefix",
+                "url_template",
+                "is_alphanumeric"
+              ],
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "key_prefix": {
+                  "type": "string"
+                },
+                "url_template": {
+                  "type": "string"
+                },
+                "is_alphanumeric": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
           "team_permissions": {
             "type": "array",
             "items": {

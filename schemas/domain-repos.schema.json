@@ -305,6 +305,27 @@
               }
             }
           },
+          "jira_autolink": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Optional Jira autolink configuration. Its presence enables one Jira autolink for this repository.",
+            "required": [
+              "project_key"
+            ],
+            "properties": {
+              "project_key": {
+                "type": "string",
+                "pattern": "^[A-Z][A-Z0-9]{1,9}$",
+                "description": "Jira project key (2-10 uppercase letters/digits); used as the autolink prefix."
+              },
+              "browse_url": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https://[^?#\\s]+$",
+                "description": "Optional HTTPS Jira browse URL prefix overriding enterprise_defaults.jira_autolink.browse_url."
+              }
+            }
+          },
           "required_status_checks": {
             "type": "array",
             "items": {

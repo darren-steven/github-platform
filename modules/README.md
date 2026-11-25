@@ -14,7 +14,7 @@ flowchart LR
     CR["modules/config-resolver\n(Pure HCL — 4-layer merge)"]
     ORG["modules/org-baseline\n(Org settings, Actions, Runners)"]
     TEAMS["modules/teams\n(Root & child teams, memberships)"]
-    REPOS["modules/domain-repositories\n(Repos, Rulesets, Access, Envs, Vars)"]
+    REPOS["modules/domain-repositories\n(Repos, Rulesets, Access, Envs, Vars, Jira autolinks)"]
 
     YAML --> CR
     CR --> ORG
@@ -33,7 +33,7 @@ flowchart LR
 | [`enterprise-baseline/`](./enterprise-baseline/README.md) | Manages Enterprise-scoped resources and policy ceiling summaries from `config/enterprise.yaml`. | `data.github_enterprise`, `github_enterprise_actions_runner_group` |
 | [`org-baseline/`](./org-baseline/README.md) | Applies organization-wide security dials, GitHub Actions token policies, and runner groups. | `github_organization_settings`, `github_actions_organization_permissions`, `github_actions_runner_group` |
 | [`teams/`](./teams/README.md) | Creates centralized GitHub Teams in two passes (root teams, then child teams) and manages memberships. | `github_team`, `github_team_membership` |
-| [`domain-repositories/`](./domain-repositories/README.md) | Provisions repositories, modern Repository Rulesets, team permissions, deployment environments, and non-sensitive Actions variables. | `github_repository`, `github_repository_ruleset`, `github_team_repository`, `github_repository_environment`, `github_actions_variable` |
+| [`domain-repositories/`](./domain-repositories/README.md) | Provisions repositories, modern Repository Rulesets, team permissions, deployment environments, non-sensitive Actions variables, and optional Jira autolinks. | `github_repository`, `github_repository_ruleset`, `github_team_repository`, `github_repository_environment`, `github_actions_variable`, `github_repository_autolink_reference` |
 
 ---
 

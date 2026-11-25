@@ -15,5 +15,6 @@ output "resource_counts" {
     team_access_links   = length(github_team_repository.this)
     environments        = length(github_repository_environment.this)
     actions_variables   = length(github_actions_variable.this)
+    jira_autolinks      = length(github_repository_autolink_reference.jira)
   }
 }

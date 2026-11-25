@@ -10,6 +10,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 import generate_config_candidates as gen  # noqa: E402
 import export_github_inventory as exp  # noqa: E402
+import generate_imports as gen_imports  # noqa: E402
 import validate_config as val  # noqa: E402
 import urllib.error  # noqa: E402
 
@@ -107,6 +108,14 @@ SAMPLE_INVENTORY = {
             ],
             "environments": [
                 {"name": "prod", "require_approval": False, "approver_teams": []}
+            ],
+            "autolinks": [
+                {
+                    "id": 42,
+                    "key_prefix": "PPLCTNS-",
+                    "url_template": "https://taswater-applications.atlassian.net/browse/PPLCTNS-<num>",
+                    "is_alphanumeric": False,
+                }
             ],
         },
         {
@@ -339,6 +348,8 @@ def main():
         return 1
 
     test_exporter_handles_400_on_external_groups()
+    test_jira_autolink_config_validation()
+    test_jira_autolink_import_blocks()
 
     print(
         "  PASS: Inventory schema, domain deduction (team + repo prefix), schema-valid candidate generation, and drift detection verified."
@@ -366,7 +377,7 @@ def test_exporter_handles_400_on_external_groups():
                 return None
             return None
 
-        def get_paginated(self, path, list_key=None):
+        def get_paginated(self, path, list_key=None, allow_optional_errors=True):
             if path == "/orgs/TasWater/teams":
                 return [
                     {
@@ -388,12 +399,67 @@ def test_exporter_handles_400_on_external_groups():
                         "topics": ["IaC"],
                     }
                 ]
+            if path == "/repos/TasWater/platform-github/autolinks":
+                assert allow_optional_errors is False
+                return [
+                    {
+                        "id": 42,
+                        "key_prefix": "PPLCTNS-",
+                        "url_template": "https://taswater-applications.atlassian.net/browse/PPLCTNS-<num>",
+                        "is_alphanumeric": False,
+                    }
+                ]
             return []
 
     snap = exp.export_organization_inventory(MockClient(), "TasWater")
     assert snap["organization"]["slug"] == "taswater", f"Expected lowercase slug 'taswater', got {snap['organization']['slug']}"
     assert snap["teams"][0]["slug"] == "platform-admins"
     assert snap["repositories"][0]["topics"] == ["iac"]
+    assert snap["repositories"][0]["autolinks"][0]["key_prefix"] == "PPLCTNS-"
+
+
+def test_jira_autolink_import_blocks():
+    blocks = gen_imports.jira_autolink_import_blocks(
+        "platform-github",
+        {"project_key": "PPLCTNS"},
+        [{"key_prefix": "PPLCTNS-"}],
+    )
+    assert 'to = module.repositories.github_repository_autolink_reference.jira["platform-github"]' in blocks
+    assert 'id = "platform-github/PPLCTNS-"' in blocks
+
+    assert not gen_imports.jira_autolink_import_blocks(
+        "platform-github",
+        {"project_key": "PPLCTNS"},
+        [{"key_prefix": "OTHER-"}],
+    )
+    assert not gen_imports.jira_autolink_import_blocks(
+        "platform-github",
+        None,
+        [{"key_prefix": "PPLCTNS-"}],
+    )
+
+
+def test_jira_autolink_config_validation():
+    domain_schema = val.load_json(str(REPO_ROOT / "schemas/domain-repos.schema.json"))
+    domain_doc = gen_imports.load_yaml(REPO_ROOT / "config/orgs/taswater/repos/platform.yaml")
+    domain_doc["repositories"][0]["jira_autolink"] = {"project_key": "PPLCTNS"}
+
+    val.errors.clear()
+    val.validate_against_schema(domain_doc, domain_schema, "jira_valid")
+    assert not val.errors, f"Expected a valid Jira opt-in to pass schema validation, got {val.errors}"
+
+    val.validate_jira_browse_url(
+        "https:///browse",
+        "jira_invalid",
+        "jira_autolink.browse_url",
+    )
+    assert val.errors, "Expected a browse URL without a hostname to fail validation"
+
+    domain_doc["repositories"][0]["jira_autolink"]["project_key"] = "pplctns"
+    val.errors.clear()
+    val.validate_against_schema(domain_doc, domain_schema, "jira_invalid_key")
+    assert val.errors, "Expected a lowercase Jira project key to fail schema validation"
+    val.errors.clear()
 
 
 if __name__ == "__main__":

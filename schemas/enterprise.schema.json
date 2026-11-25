@@ -91,7 +91,8 @@
         "actions",
         "copilot",
         "codespaces",
-        "billing"
+        "billing",
+        "jira_autolink"
       ],
       "properties": {
         "actions": {
@@ -258,6 +259,23 @@
               "maximum": 50000,
               "default": 5000,
               "description": "FinOps Ceiling: Maximum monthly USD budget any single organization budget entry may request."
+            }
+          }
+        },
+        "jira_autolink": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Shared default Jira browse URL for repositories that opt into Jira autolinks.",
+          "required": [
+            "browse_url"
+          ],
+          "properties": {
+            "browse_url": {
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://[^?#\\s]+$",
+              "default": "https://taswater-applications.atlassian.net/browse",
+              "description": "HTTPS Jira browse URL prefix. Repositories opt in separately by providing a Jira project key."
             }
           }
         }

@@ -106,12 +106,21 @@ locals {
 
         codeowners_teams = try(repo.codeowners_teams, [])
 
+        domain_environments = tolist([
+          for env in domain_doc.defaults.environments : {
+            name                     = env.name
+            description              = try(env.description, "")
+            require_approval         = env.require_approval
+            approver_teams           = try(env.approver_teams, [])
+            deployment_branch_policy = try(env.deployment_branch_policy, "protected_branches")
+          }
+        ])
         # Deployment environments: Repo-level list replaces domain defaults when specified
         environments = [
          for env in (
           try(repo.environments, null) != null
             ? tolist(repo.environments)
-            : tolist(try(domain_doc.defaults.environments, []))
+            : tolist(try(domain_environments, []))
           ) : {
             name                     = env.name
             description              = try(env.description, "")

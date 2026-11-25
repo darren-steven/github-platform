@@ -6,6 +6,7 @@ This root OpenTofu stack manages **GitHub Enterprise Cloud** settings defined in
 
 - **Least-Privilege Auth**: Per-organization stacks (`environments/taswater/`) never need Enterprise Owner or Enterprise Billing tokens.
 - **Blast-Radius Isolation**: Enterprise-wide runner groups and policy ceilings live in their own state file and require Platform Admin review.
+- **Provider Scope**: The GitHub provider's `owner` is read directly from `enterprise.slug` in `config/enterprise.yaml`, avoiding a dependency on provider-backed module outputs.
 
 ## How to Run a Safe Local Plan (Read-Only)
 

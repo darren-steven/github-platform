@@ -30,4 +30,4 @@ repositories:
 - name: platform-github
   description: GitGub IaC
   jira_autolink:
-    project_key: PLATFORM
+    project_key: PPLCTNS

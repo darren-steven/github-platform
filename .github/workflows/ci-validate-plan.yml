@@ -80,7 +80,60 @@ jobs:
       - name: OpenTofu Plan Organisation
         env:
           GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
-        run: tofu plan -input=false -no-color
+        run: |
+          set -o pipefail
+          tofu plan -input=false -no-color -out="$RUNNER_TEMP/tofu-plan.tfplan" 2>&1 | tee "$RUNNER_TEMP/tofu-plan.txt"
+          tofu show -json "$RUNNER_TEMP/tofu-plan.tfplan" > "$RUNNER_TEMP/tofu-plan.json"
+
+      - name: Add plan summary to job summary
+        if: always()
+        run: |
+          {
+            echo "<details>"
+            echo "<summary>OpenTofu plan summary</summary>"
+            echo
+            echo '```text'
+            if [ -f "$RUNNER_TEMP/tofu-plan.txt" ]; then
+              plan_summary="$(grep '^Plan: ' "$RUNNER_TEMP/tofu-plan.txt" | tail -n 1 || true)"
+              if [ -n "$plan_summary" ]; then
+                echo "$plan_summary"
+              else
+                echo "No plan summary was captured."
+              fi
+            else
+              echo "No plan summary was captured."
+            fi
+            echo '```'
+            if [ -f "$RUNNER_TEMP/tofu-plan.json" ] && jq -e '(.output_changes // {}) | length > 0' "$RUNNER_TEMP/tofu-plan.json" >/dev/null; then
+              echo
+              echo "Changes to Outputs:"
+              echo '```json'
+              jq '
+                def has_sensitive:
+                  if . == true then true
+                  elif type == "object" then any(.[]; has_sensitive)
+                  elif type == "array" then any(.[]; has_sensitive)
+                  else false
+                  end;
+                (.output_changes // {})
+                | with_entries(
+                    .value |= (
+                      if ((.before_sensitive // false) | has_sensitive)
+                      then .before = "(sensitive)"
+                      else .
+                      end
+                      | if ((.after_sensitive // false) | has_sensitive)
+                        then .after = "(sensitive)"
+                        else .
+                        end
+                      | del(.before_sensitive, .after_sensitive)
+                    )
+                  )
+              ' "$RUNNER_TEMP/tofu-plan.json"
+              echo '```'
+            fi
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   opentofu-plan-enterprise:
     name: "2. OpenTofu Plan (taswater GitHub Enterprise)"
@@ -128,4 +181,57 @@ jobs:
       - name: OpenTofu Plan Organisation
         env:
           GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
-        run: tofu plan -input=false -no-color
+        run: |
+          set -o pipefail
+          tofu plan -input=false -no-color -out="$RUNNER_TEMP/tofu-plan.tfplan" 2>&1 | tee "$RUNNER_TEMP/tofu-plan.txt"
+          tofu show -json "$RUNNER_TEMP/tofu-plan.tfplan" > "$RUNNER_TEMP/tofu-plan.json"
+
+      - name: Add plan summary to job summary
+        if: always()
+        run: |
+          {
+            echo "<details>"
+            echo "<summary>OpenTofu plan summary</summary>"
+            echo
+            echo '```text'
+            if [ -f "$RUNNER_TEMP/tofu-plan.txt" ]; then
+              plan_summary="$(grep '^Plan: ' "$RUNNER_TEMP/tofu-plan.txt" | tail -n 1 || true)"
+              if [ -n "$plan_summary" ]; then
+                echo "$plan_summary"
+              else
+                echo "No plan summary was captured."
+              fi
+            else
+              echo "No plan summary was captured."
+            fi
+            echo '```'
+            if [ -f "$RUNNER_TEMP/tofu-plan.json" ] && jq -e '(.output_changes // {}) | length > 0' "$RUNNER_TEMP/tofu-plan.json" >/dev/null; then
+              echo
+              echo "Changes to Outputs:"
+              echo '```json'
+              jq '
+                def has_sensitive:
+                  if . == true then true
+                  elif type == "object" then any(.[]; has_sensitive)
+                  elif type == "array" then any(.[]; has_sensitive)
+                  else false
+                  end;
+                (.output_changes // {})
+                | with_entries(
+                    .value |= (
+                      if ((.before_sensitive // false) | has_sensitive)
+                      then .before = "(sensitive)"
+                      else .
+                      end
+                      | if ((.after_sensitive // false) | has_sensitive)
+                        then .after = "(sensitive)"
+                        else .
+                        end
+                      | del(.before_sensitive, .after_sensitive)
+                    )
+                  )
+              ' "$RUNNER_TEMP/tofu-plan.json"
+              echo '```'
+            fi
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"

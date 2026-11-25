@@ -29,3 +29,5 @@ repositories:
   description: AzureDevops IaC
 - name: platform-github
   description: GitGub IaC
+  jira_autolink:
+    project_key: PLATFORM

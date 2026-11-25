@@ -419,23 +419,25 @@ def test_exporter_handles_400_on_external_groups():
 
 
 def test_jira_autolink_import_blocks():
+    repo = next(repo for repo in SAMPLE_INVENTORY["repositories"] if repo["name"] == "invoice-worker")
     blocks = gen_imports.jira_autolink_import_blocks(
-        "platform-github",
+        repo["name"],
         {"project_key": "PPLCTNS"},
-        [{"key_prefix": "PPLCTNS-"}],
+        repo["autolinks"],
     )
-    assert 'to = module.repositories.github_repository_autolink_reference.jira["platform-github"]' in blocks
-    assert 'id = "platform-github/PPLCTNS-"' in blocks
+    block_text = "\n".join(blocks)
+    assert 'to = module.repositories.github_repository_autolink_reference.jira["invoice-worker"]' in block_text
+    assert 'id = "invoice-worker/PPLCTNS-"' in block_text
 
     assert not gen_imports.jira_autolink_import_blocks(
-        "platform-github",
+        repo["name"],
         {"project_key": "PPLCTNS"},
         [{"key_prefix": "OTHER-"}],
     )
     assert not gen_imports.jira_autolink_import_blocks(
-        "platform-github",
+        repo["name"],
         None,
-        [{"key_prefix": "PPLCTNS-"}],
+        repo["autolinks"],
     )
 
 

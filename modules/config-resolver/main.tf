@@ -108,7 +108,11 @@ locals {
 
         # Deployment environments: Repo-level list replaces domain defaults when specified
         environments = [
-          for env in(try(repo.environments, null) != null ? repo.environments : try(domain_doc.defaults.environments, [])) : {
+          for env in coalescelist(
+            try(tolist(repo.environments), []),
+            try(tolist(domain_doc.defaults.environments), [])
+            ) : 
+          {
             name                     = env.name
             description              = try(env.description, "")
             require_approval         = env.require_approval

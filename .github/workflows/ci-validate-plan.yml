@@ -77,7 +77,55 @@ jobs:
           GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
         run: tofu validate
 
-      - name: OpenTofu Plan
+      - name: OpenTofu Plan Organisation
+        env:
+          GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
+        run: tofu plan -input=false -no-color
+
+  opentofu-plan-enterprise:
+    name: "2. OpenTofu Plan (taswater GitHub Enterprise)"
+    needs: validate-guardrails
+    runs-on: ubuntu-latest
+    # Only run plan when enabled and never expose the app key to external forks.
+    if: >-
+      vars.TOFU_PLAN_ENABLED == 'true' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: environments/enterprise
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Dump Env
+        run: env
+
+      - name: Create GitHub App installation token
+        id: github-app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: TasWater
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.8.2"
+
+      - name: OpenTofu Init
+        env:
+          GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
+        run: tofu init
+
+      - name: OpenTofu Validate
+        env:
+          GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
+        run: tofu validate
+
+      - name: OpenTofu Plan Organisation
         env:
           GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
         run: tofu plan -input=false -no-color

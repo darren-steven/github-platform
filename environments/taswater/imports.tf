@@ -1469,6 +1469,11 @@ import {
 }
 
 import {
+  to = module.repositories.github_repository_autolink_reference.jira["platform-github"]
+  id = "platform-github/PPLCTNS-"
+}
+
+import {
   to = module.repositories.github_repository.this["reporting"]
   id = "reporting"
 }

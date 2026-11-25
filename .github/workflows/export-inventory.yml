@@ -1,0 +1,193 @@
+name: "Export GitHub Org Inventory"
+
+on:
+  workflow_dispatch:
+    inputs:
+      org:
+        description: "GitHub Organization slug (normalized to lowercase on disk, e.g. taswater)"
+        required: true
+        type: string
+        default: "taswater"
+      update_imports:
+        description: "Regenerate environments/<org>/imports.tf from the exported inventory"
+        required: false
+        type: boolean
+        default: true
+      update_candidates:
+        description: "Regenerate candidates/<org>/ YAML files and drift-report.md"
+        required: false
+        type: boolean
+        default: false
+      commit_to_branch:
+        description: "Commit updated inventory/imports/candidates back to the current branch"
+        required: false
+        type: boolean
+        default: false
+
+# Default least-privilege token permissions
+permissions:
+  contents: read
+
+jobs:
+  export-inventory:
+    name: "1. Export Inventory & Validate"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      org_slug: ${{ steps.normalize.outputs.org_slug }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Normalize Organization Slug (Lowercase for Cross-Platform Safety)
+        id: normalize
+        env:
+          RAW_ORG: ${{ inputs.org }}
+        run: |
+          ORG_SLUG="$(printf '%s' "${RAW_ORG}" | tr '[:upper:]' '[:lower:]' | xargs)"
+          if [[ ! "${ORG_SLUG}" =~ ^[a-z0-9][a-z0-9-]{1,62}$ ]]; then
+            echo "ERROR: Invalid organization slug '${RAW_ORG}' (normalized: '${ORG_SLUG}')." >&2
+            exit 1
+          fi
+          echo "org_slug=${ORG_SLUG}" >> "${GITHUB_OUTPUT}"
+          echo "ORG_SLUG=${ORG_SLUG}" >> "${GITHUB_ENV}"
+          echo "Normalized organization slug: ${ORG_SLUG}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.8.2"
+
+      - name: Create GitHub App installation token
+        id: github-app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ env.ORG_SLUG }}
+
+      - name: Export Organization Inventory
+        env:
+          GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python3 scripts/export_github_inventory.py \
+            --org "${ORG_SLUG}" \
+            --output "inventory/${ORG_SLUG}.inventory.json"
+
+      - name: Regenerate OpenTofu Import Blocks
+        if: inputs.update_imports == true
+        run: |
+          if [[ -d "environments/${ORG_SLUG}" && -d "config/orgs/${ORG_SLUG}" ]]; then
+            python3 scripts/generate_imports.py --org "${ORG_SLUG}"
+          else
+            echo "Skipping generate_imports.py: config/orgs/${ORG_SLUG} or environments/${ORG_SLUG} not present."
+          fi
+
+      - name: Regenerate Candidate YAML & Drift Report
+        if: inputs.update_candidates == true
+        run: |
+          python3 scripts/generate_config_candidates.py \
+            --inventory "inventory/${ORG_SLUG}.inventory.json" \
+            --output-dir "candidates/${ORG_SLUG}"
+
+      - name: Run Unified Validation Harness
+        run: ./scripts/validate.sh
+
+      - name: Upload Exported Inventory Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-inventory-${{ env.ORG_SLUG }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            inventory/${{ env.ORG_SLUG }}.inventory.json
+            environments/${{ env.ORG_SLUG }}/imports.tf
+            candidates/${{ env.ORG_SLUG }}/**
+
+      - name: Write Export Summary
+        run: |
+          python3 - "${ORG_SLUG}" >> "${GITHUB_STEP_SUMMARY}" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          org = sys.argv[1]
+          inv_path = Path(f"inventory/{org}.inventory.json")
+          data = json.loads(inv_path.read_text(encoding="utf-8"))
+          repos = data.get("repositories", [])
+          active_repos = [r for r in repos if not r.get("archived", False)]
+          archived_repos = [r for r in repos if r.get("archived", False)]
+          autolinks = sum(len(r.get("autolinks", [])) for r in repos)
+
+          print(f"### GitHub Inventory Export Summary (`{org}`)")
+          print()
+          print(f"- **Inventory File**: `inventory/{org}.inventory.json`")
+          print(f"- **Exported At**: `{data.get('exported_at')}`")
+          print(f"- **Teams Discovered**: `{len(data.get('teams', []))}`")
+          print(f"- **Active Repositories**: `{len(active_repos)}`")
+          print(f"- **Archived Repositories**: `{len(archived_repos)}`")
+          print(f"- **Repository Autolinks Discovered**: `{autolinks}`")
+          PY
+
+  commit-inventory:
+    name: "2. Commit Updated Inventory to Branch"
+    needs: export-inventory
+    if: inputs.commit_to_branch == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      ORG_SLUG: ${{ needs.export-inventory.outputs.org_slug }}
+    steps:
+      - name: Checkout Branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Download Exported Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: github-inventory-${{ env.ORG_SLUG }}
+          path: .
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Re-Verify Guardrails & Case-Sensitivity Before Commit
+        run: ./scripts/validate.sh
+
+      - name: Commit & Push Updated Inventory Files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add "inventory/${ORG_SLUG}.inventory.json"
+          if [[ -f "environments/${ORG_SLUG}/imports.tf" ]]; then
+            git add "environments/${ORG_SLUG}/imports.tf"
+          fi
+          if [[ -d "candidates/${ORG_SLUG}" ]]; then
+            git add "candidates/${ORG_SLUG}"
+          fi
+
+          if git diff --cached --quiet; then
+            echo "No inventory, import, or candidate changes detected."
+            exit 0
+          fi
+
+          git commit -m "chore(inventory): refresh ${ORG_SLUG} inventory and OpenTofu imports"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

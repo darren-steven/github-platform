@@ -61,6 +61,7 @@ def jira_autolink_import_blocks(repo_name: str, jira_config: dict, live_autolink
 
 
 def generate_imports(org_slug: str) -> int:
+    org_slug = org_slug.strip().lower()
     inv_path = REPO_ROOT / "inventory" / f"{org_slug}.inventory.json"
     config_dir = REPO_ROOT / "config" / "orgs" / org_slug
     env_dir = REPO_ROOT / "environments" / org_slug

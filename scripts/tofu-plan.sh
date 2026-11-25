@@ -24,7 +24,7 @@ if [[ $# -lt 1 ]]; then
   exit 1
 fi
 
-ORG_SLUG="$1"
+ORG_SLUG="$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')"
 shift
 ENV_DIR="${REPO_ROOT}/environments/${ORG_SLUG}"
 

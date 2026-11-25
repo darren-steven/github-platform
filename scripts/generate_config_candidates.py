@@ -629,8 +629,15 @@ def main():
     with open(inv_path, "r", encoding="utf-8") as f:
         inventory = json.load(f)
 
-    org_slug = inventory["organization"]["slug"]
+    org_slug = inventory["organization"]["slug"].strip().lower()
     out_dir = Path(args.output_dir or f"candidates/{org_slug}")
+    if out_dir.name != out_dir.name.lower():
+        print(
+            f"ERROR: Output directory '{out_dir}' contains uppercase characters in '{out_dir.name}'. "
+            f"Use lowercase ('{out_dir.name.lower()}') to prevent Windows/macOS checkout collisions.",
+            file=sys.stderr,
+        )
+        return 1
     out_dir.mkdir(parents=True, exist_ok=True)
 
     result = generate_candidates(inventory, include_archived=args.include_archived)

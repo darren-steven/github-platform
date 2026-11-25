@@ -51,9 +51,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Dump Env
-        run: env
-
       - name: Create GitHub App installation token
         id: github-app-token
         uses: actions/create-github-app-token@v2
@@ -152,9 +149,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Dump Env
-        run: env
-
       - name: Create GitHub App installation token
         id: github-app-token
         uses: actions/create-github-app-token@v2
@@ -178,7 +172,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
         run: tofu validate
 
-      - name: OpenTofu Plan Organisation
+      - name: OpenTofu Plan Enterprise
         env:
           GITHUB_TOKEN: ${{ steps.github-app-token.outputs.token }}
         run: |

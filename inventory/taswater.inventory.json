@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "exported_at": "2026-11-18T06:26:59Z",
+  "exported_at": "2026-11-25T22:34:38Z",
   "organization": {
     "slug": "taswater",
     "name": "TasWater",
@@ -144,7 +144,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "761_anywhere_development",
@@ -183,7 +184,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "762_anywhere_development",
@@ -222,7 +224,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "account-bc-sapi-v1",
@@ -266,7 +269,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "account-mgmt-eapi-v1",
@@ -310,7 +314,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "AnyPoint",
@@ -354,7 +359,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "anypoint-wrapper-cli",
@@ -398,7 +404,8 @@
           "permission": "pull"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Anywhere761full",
@@ -437,7 +444,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "anywhere_development",
@@ -481,7 +489,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-address-v1",
@@ -525,7 +534,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-banking-v1",
@@ -569,7 +579,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-employee-v1",
@@ -608,7 +619,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-gentrack-customer-v1",
@@ -652,7 +664,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-inventory-v1",
@@ -696,7 +709,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-keep-alive-v1",
@@ -744,7 +758,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-locations-v1",
@@ -792,7 +807,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-logging-v1",
@@ -840,7 +856,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-payway-proxy",
@@ -879,7 +896,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-people-v1",
@@ -918,7 +936,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-procurement-v1",
@@ -962,7 +981,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-reference-data-v1",
@@ -1010,7 +1030,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-service-desk-v1",
@@ -1049,7 +1070,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-sessions-v1",
@@ -1097,7 +1119,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-sewerage-pricing-estimator-v1",
@@ -1136,7 +1159,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-something-v1",
@@ -1180,7 +1204,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-template-v1",
@@ -1224,7 +1249,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-work-orders-toapprove-v1",
@@ -1263,7 +1289,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "api-work-orders-v1",
@@ -1311,7 +1338,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "ARG1903_Equalisation",
@@ -1355,7 +1383,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "automation",
@@ -1394,7 +1423,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "azdo-iac",
@@ -1433,7 +1463,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "azure-templates",
@@ -1485,7 +1516,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "AzureNamingTool",
@@ -1530,7 +1562,8 @@
           "require_approval": false,
           "approver_teams": []
         }
-      ]
+      ],
+      "autolinks": []
     },
     {
       "name": "BC-SSIS-Pipeline",
@@ -1569,7 +1602,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "BI-DataFlow",
@@ -1608,7 +1642,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "BI_IRIS_IncidentsHazards",
@@ -1652,7 +1687,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "BI_RealisedRevenue",
@@ -1691,7 +1727,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "BillFileRecognition",
@@ -1739,7 +1776,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "BillFileReconciliation",
@@ -1778,7 +1816,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "calc_IP_address_ranges",
@@ -1817,7 +1856,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "centrelink_concession_bulk_verification",
@@ -1856,7 +1896,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "CentrePay_Receipt_ETL",
@@ -1900,7 +1941,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "CIO-Pulse",
@@ -1939,7 +1981,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "CiscoWhisper-SSH",
@@ -1983,7 +2026,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "cloudhub-app-bulk-update",
@@ -2027,7 +2071,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "common-lib",
@@ -2071,7 +2116,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "config",
@@ -2110,7 +2156,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Contacts-api",
@@ -2149,7 +2196,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "coo-prep-v3",
@@ -2188,7 +2236,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "cordova-plugin-inappbrowser",
@@ -2227,7 +2276,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "cornerstone-chris21-integration-report-syncer",
@@ -2266,7 +2316,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Cornerstone_Chris21_Integration",
@@ -2305,7 +2356,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "cszbarIOS11",
@@ -2344,7 +2396,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "customer-ebilling-eapi-v1",
@@ -2388,7 +2441,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "customer-interaction-eapi-v1",
@@ -2427,7 +2481,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "customer-interaction-papi-v1",
@@ -2466,7 +2521,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "dataops-fme",
@@ -2505,7 +2561,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "dataops-fme-test",
@@ -2544,7 +2601,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "dataops-general",
@@ -2583,7 +2641,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "DBA_Tools",
@@ -2622,7 +2681,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "digital-portal-eapi-v1",
@@ -2661,7 +2721,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Dougs809",
@@ -2705,7 +2766,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "DougsQuickReference",
@@ -2744,7 +2806,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "ebilling-papi-v1",
@@ -2788,7 +2851,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Excel",
@@ -2832,7 +2896,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "ExtractExchangeAttachment",
@@ -2880,7 +2945,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "finance-bc-sapi-v1",
@@ -2924,7 +2990,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "finance-db-sapi-v1",
@@ -2968,7 +3035,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "finance-integ-papi-v1",
@@ -3012,7 +3080,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "finance-mx-sapi-v1",
@@ -3051,7 +3120,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "fme",
@@ -3090,7 +3160,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "fme-test",
@@ -3129,7 +3200,48 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
+    },
+    {
+      "name": "FME_Support",
+      "description": "TasWater FME support files: new user connection files and the FME debugging guide. Maintained by the FME Administrators. Internal use only.",
+      "archived": false,
+      "visibility": "internal",
+      "default_branch": "main",
+      "topics": [],
+      "features": {
+        "has_issues": true,
+        "has_wiki": true,
+        "has_discussions": false,
+        "has_projects": true
+      },
+      "merge_strategies": {
+        "allow_squash_merge": true,
+        "allow_merge_commit": true,
+        "allow_rebase_merge": false,
+        "allow_auto_merge": false,
+        "delete_branch_on_merge": true
+      },
+      "branch_protection": {
+        "protected": false,
+        "min_reviewers": 0,
+        "dismiss_stale_reviews": false,
+        "require_code_owner_reviews": false,
+        "require_last_push_approval": false,
+        "require_conversation_resolution": false,
+        "require_signed_commits": false,
+        "require_linear_history": false,
+        "required_status_checks": []
+      },
+      "security": {
+        "dependabot_alerts": true,
+        "secret_scanning": false,
+        "secret_scanning_push_protection": false
+      },
+      "team_permissions": [],
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "FormsExpress",
@@ -3173,7 +3285,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Gentrack-ABCorp-Integration",
@@ -3220,7 +3333,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Gentrack-Pricing-Snapshot-system---DW",
@@ -3259,7 +3373,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Gentrack-RFGateways-Integration",
@@ -3298,7 +3413,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "gentrack-sapi-v1",
@@ -3337,7 +3453,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Gentrack-SSIS",
@@ -3385,7 +3502,8 @@
           "permission": "pull"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "GentrackReportingDB_andGTtoGIS",
@@ -3424,7 +3542,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "GetFileFromHpeTrim",
@@ -3463,7 +3582,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "GIS_Scripts",
@@ -3507,7 +3627,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "github-copilot-iac-example",
@@ -3546,7 +3667,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "github-security-audit",
@@ -3585,7 +3707,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "InstallationDataQuality",
@@ -3624,7 +3747,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "jenkins-seed",
@@ -3668,7 +3792,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "JmeterApiTests",
@@ -3707,7 +3832,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "JSEA-Python-HTML-Data-Extraction",
@@ -3746,7 +3872,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Maximo",
@@ -3785,7 +3912,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "mule-nonprod-config",
@@ -3829,7 +3957,8 @@
           "permission": "pull"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "mule-prod-config",
@@ -3873,7 +4002,8 @@
           "permission": "pull"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "mule_sandbox_email_imap",
@@ -3912,7 +4042,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "mulesoft",
@@ -3956,7 +4087,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Network-IndustrialSwitches",
@@ -3995,7 +4127,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Office365Scripts",
@@ -4034,7 +4167,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "OGP-DatabaseMigration",
@@ -4078,7 +4212,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "OGP-IntegrationAndReporting",
@@ -4117,7 +4252,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "OutSystems---H2GO",
@@ -4156,7 +4292,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "PI-TaKaDu-Integration",
@@ -4200,7 +4337,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "pi_mulesoft_transforms",
@@ -4244,7 +4382,8 @@
           "permission": "pull"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "platform-azuredevops",
@@ -4283,7 +4422,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "platform-github",
@@ -4322,7 +4462,15 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": [
+        {
+          "id": 19535926,
+          "key_prefix": "PPLCTNS-",
+          "url_template": "https://taswater-applications.atlassian.net/browse/PPLCTNS-<num>",
+          "is_alphanumeric": false
+        }
+      ]
     },
     {
       "name": "PRTG_Scripts",
@@ -4361,13 +4509,14 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "PS_SPtoSQL",
       "description": "PowerShell script to take SharePoint lists and send to SQL table",
       "archived": false,
-      "visibility": "private",
+      "visibility": "internal",
       "default_branch": "main",
       "topics": [],
       "features": {
@@ -4400,7 +4549,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "PSP2-TradeWasteCalculator",
@@ -4439,7 +4589,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "PSP3",
@@ -4483,7 +4634,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "PSP3-TradeWasteCalculator",
@@ -4522,7 +4674,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "PythonDataTesting",
@@ -4561,7 +4714,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "QPC",
@@ -4600,7 +4754,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Rancid-Clogin-Scripts",
@@ -4639,7 +4794,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "RancidAutomationScripts",
@@ -4678,7 +4834,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "reporting",
@@ -4726,7 +4883,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "RouterScripts",
@@ -4770,7 +4928,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "sandbox-objects-scheduler",
@@ -4814,7 +4973,8 @@
           "permission": "pull"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SCOM-ManagementPacks",
@@ -4870,7 +5030,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Scripts_BureauOfMetereology",
@@ -4914,7 +5075,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "sdautomator",
@@ -4962,7 +5124,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Selenium",
@@ -5001,7 +5164,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SELinux",
@@ -5040,7 +5204,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "spatial",
@@ -5079,7 +5244,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "spatial_arcgis_desktop_aim_tools",
@@ -5123,7 +5289,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "spatial_arcgis_server_service_config",
@@ -5167,7 +5334,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "spatial_batch_processing_scripts",
@@ -5211,7 +5379,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "spatial_geocortex_config",
@@ -5255,7 +5424,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "sql-dba",
@@ -5294,7 +5464,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "ssis-gentrack-banking",
@@ -5333,7 +5504,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SSIS_BureauOfMetereology",
@@ -5377,7 +5549,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SSIS_Centrelink_ImportResponses",
@@ -5416,7 +5589,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SSIS_Chris21_ETL",
@@ -5460,7 +5634,8 @@
           "permission": "pull"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SSIS_CreditCycles",
@@ -5504,7 +5679,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SSIS_FormsExpress_FileMover",
@@ -5548,7 +5724,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SSIS_GTLetterImport",
@@ -5592,7 +5769,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SSIS_GTV_AgedDebtors_DW",
@@ -5631,7 +5809,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SSIS_Metadata_extractor",
@@ -5670,7 +5849,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SSIS_VisTas",
@@ -5714,7 +5894,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "ssis_VisTas_COO_V3",
@@ -5753,7 +5934,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SSRS---Apps-Admin",
@@ -5792,7 +5974,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SSRS_Gentrack",
@@ -5831,7 +6014,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SSRS_Gentrack_Pricing",
@@ -5870,7 +6054,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "SSRS_GT_IntegrityCheck",
@@ -5914,7 +6099,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Survey-ASDS_CADtoGIS_Translator",
@@ -5953,7 +6139,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Survey-ASDS_V2_Support_Files",
@@ -5992,7 +6179,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "taswater-error-handling-util",
@@ -6036,7 +6224,8 @@
           "permission": "maintain"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "TasWater-Scripts",
@@ -6084,7 +6273,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "test",
@@ -6128,7 +6318,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "turbine_deployment",
@@ -6172,7 +6363,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "turbine_development",
@@ -6216,7 +6408,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "TW-809-PythonTools",
@@ -6264,7 +6457,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "TW-NetworkTeam",
@@ -6312,7 +6506,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "TW-Python-DATABASE",
@@ -6351,7 +6546,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "TW-Router-Configurations",
@@ -6395,7 +6591,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "TW-Switch-Configurations",
@@ -6439,7 +6636,8 @@
           "permission": "admin"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "WestPac_FileSplitter_Reports",
@@ -6483,7 +6681,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "Westpac_FileSplitters",
@@ -6527,7 +6726,8 @@
           "permission": "push"
         }
       ],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     },
     {
       "name": "YARA-Rules",
@@ -6566,7 +6766,8 @@
         "secret_scanning_push_protection": false
       },
       "team_permissions": [],
-      "environments": []
+      "environments": [],
+      "autolinks": []
     }
   ]
 }

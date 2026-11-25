@@ -5,6 +5,9 @@ Queries the GitHub REST API (using GITHUB_TOKEN / GH_TOKEN or `gh auth token`)
 to capture a point-in-time JSON snapshot of an organization's settings, teams,
 repositories, team permissions, branch protections, deployment environments,
 and repository autolink references.
+
+Streams flushed progress updates to stderr during CLI runs so long exports
+(150+ repositories) show real-time progress in terminals and GitHub Actions.
 """
 
 import argparse
@@ -13,6 +16,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -20,6 +24,12 @@ from pathlib import Path
 
 
 OPTIONAL_HTTP_STATUS_CODES = (400, 403, 404, 409, 422, 501)
+
+
+def stderr_progress_logger(message: str) -> None:
+    """Write a timestamped, immediately-flushed progress line to stderr."""
+    ts = datetime.now(timezone.utc).strftime("%H:%M:%SZ")
+    print(f"[{ts}] {message}", file=sys.stderr, flush=True)
 
 
 class GitHubReadOnlyClient:
@@ -111,22 +121,36 @@ def normalize_permission(repo_team_obj):
     return mapping.get(role_name, "pull")
 
 
-def export_organization_inventory(client, org_slug):
+def export_organization_inventory(client, org_slug, progress_callback=None):
     """Fetch organization, teams, and repositories into the normalized inventory dictionary."""
+    def emit(msg: str) -> None:
+        if progress_callback is not None:
+            progress_callback(msg)
+
+    emit(f"[1/3] Fetching organization metadata for '{org_slug}'...")
     org_raw = client.get_json(f"/orgs/{org_slug}")
     canonical_org_slug = (org_raw.get("login") or org_slug).lower()
 
+    emit(f"[1/3] Listing teams and repositories in '{canonical_org_slug}'...")
     teams_raw = client.get_paginated(f"/orgs/{org_slug}/teams")
     repos_raw = client.get_paginated(f"/orgs/{org_slug}/repos")
+    emit(
+        f"[1/3] Discovered {len(teams_raw)} team(s) and {len(repos_raw)} repository(ies) in '{canonical_org_slug}'."
+    )
 
     teams_by_id = {
         t.get("id"): (t.get("slug") or "").lower() for t in teams_raw if isinstance(t, dict)
     }
 
+    sorted_teams = sorted(teams_raw, key=lambda x: (x.get("slug") or "").lower())
+    total_teams = len(sorted_teams)
+    emit(f"[2/3] Exporting {total_teams} team(s) (hierarchy & IdP group mappings)...")
+
     teams = []
-    for t in sorted(teams_raw, key=lambda x: (x.get("slug") or "").lower()):
+    for idx, t in enumerate(sorted_teams, start=1):
         raw_slug = t.get("slug") or ""
         norm_slug = raw_slug.lower()
+        emit(f"  [team {idx}/{total_teams}] {norm_slug}")
         team_entry = {
             "slug": norm_slug,
             "name": t.get("name") or raw_slug,
@@ -149,11 +173,20 @@ def export_organization_inventory(client, org_slug):
                     team_entry["idp_group_id"] = str(first_group["group_id"])
         teams.append(team_entry)
 
+    sorted_repos = sorted(repos_raw, key=lambda x: (x.get("name") or "").lower())
+    total_repos = len(sorted_repos)
+    emit(
+        f"[3/3] Exporting {total_repos} repository(ies) "
+        "(team permissions, branch protection, environments, autolinks)..."
+    )
+
     repositories = []
-    for r in sorted(repos_raw, key=lambda x: (x.get("name") or "").lower()):
+    for idx, r in enumerate(sorted_repos, start=1):
         rname = r.get("name") or ""
         default_branch = r.get("default_branch") or "main"
         archived = bool(r.get("archived", False))
+        archived_suffix = " (archived)" if archived else ""
+        emit(f"  [repo {idx}/{total_repos}] {rname}{archived_suffix}")
 
         # Fetch team permissions on repo
         repo_teams_raw = client.get_paginated(f"/repos/{org_slug}/{rname}/teams")
@@ -312,11 +345,20 @@ def export_organization_inventory(client, org_slug):
     }
 
 
+def validate_lowercase_repo_path(path: Path) -> None:
+    """Reject uppercase characters in repository-managed inventory paths (Windows safety)."""
+    if path.name != path.name.lower():
+        raise ValueError(
+            f"Output filename '{path.name}' contains uppercase characters. "
+            f"Use canonical lowercase ('{path.name.lower()}') to avoid case-sensitivity collisions on Windows/macOS."
+        )
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Export a read-only JSON snapshot of a GitHub Organization's teams and repositories."
     )
-    parser.add_argument("--org", required=True, help="GitHub Organization slug (e.g., TasWater)")
+    parser.add_argument("--org", required=True, help="GitHub Organization slug (e.g., taswater)")
     parser.add_argument(
         "--output",
         help="Output JSON file path (default: inventory/<org-lowercase>.inventory.json)",
@@ -326,21 +368,33 @@ def main():
         default=os.environ.get("GITHUB_API_URL", "https://api.github.com"),
         help="GitHub REST API base URL",
     )
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Suppress per-team and per-repository progress lines on stderr",
+    )
     args = parser.parse_args()
 
-    out_path = Path(args.output or f"inventory/{args.org.lower()}.inventory.json")
+    out_path = Path(args.output or f"inventory/{args.org.strip().lower()}.inventory.json")
+    validate_lowercase_repo_path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
+    start_time = time.monotonic()
+    progress_fn = None if args.quiet else stderr_progress_logger
+
     client = GitHubReadOnlyClient(api_url=args.api_url)
-    snapshot = export_organization_inventory(client, args.org)
+    snapshot = export_organization_inventory(client, args.org.strip(), progress_callback=progress_fn)
 
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(snapshot, f, indent=2)
         f.write("\n")
 
+    elapsed = time.monotonic() - start_time
     print(
         f"Exported organization '{snapshot['organization']['slug']}' "
-        f"({len(snapshot['teams'])} teams, {len(snapshot['repositories'])} repositories) to {out_path}"
+        f"({len(snapshot['teams'])} teams, {len(snapshot['repositories'])} repositories) "
+        f"to {out_path} in {elapsed:.1f}s",
+        flush=True,
     )
     return 0
 

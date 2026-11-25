@@ -38,18 +38,29 @@ Within each deduced domain file, the generator computes the **most common `arche
 
 ---
 
-## Commands to Run
+## Commands to Run (GitHub Actions or Local CLI)
 
-### 1. Export Live Organization Inventory (Read-Only)
+> **Cross-Platform Case-Sensitivity Note (Windows / macOS / Linux)**: Always keep file and directory names **lowercase** (e.g. `taswater`, never `TasWater`). Even when GitHub's display login uses mixed case (`TasWater`), our scripts and manual workflow normalize slugs to lowercase automatically, and `./scripts/validate.sh` blocks case-colliding paths (`[PATH-CASE-COLLISION]` / `[PATH-UPPERCASE-SLUG]`) so checkouts never break on Windows.
 
-Authenticate with `gh auth login` (or export a read-only `GITHUB_TOKEN` with `read:org` and `repo` metadata read access), then run:
+### Option A — Run via GitHub Actions Manual Workflow (Recommended)
+
+1. Open the **Actions** tab in GitHub and select **Export GitHub Org Inventory** ([`.github/workflows/export-inventory.yml`](../.github/workflows/export-inventory.yml)).
+2. Click **Run workflow** on your branch with:
+   - **`org`**: `taswater`
+   - **`update_imports`**: `true` (regenerates `environments/taswater/imports.tf`, including existing repos, teams, permissions, and Jira autolinks)
+   - **`update_candidates`**: `false` (or `true` if refreshing `candidates/taswater/`)
+   - **`commit_to_branch`**: `true` to commit the refreshed `inventory/taswater.inventory.json` and `environments/taswater/imports.tf` directly to your branch, or `false` to download them as a workflow artifact.
+
+### Option B — Export Live Organization Inventory Locally (Read-Only)
+
+Authenticate with `gh auth login` (or export a read-only `GITHUB_TOKEN` with `read:org` and repository `Administration: Read` access), then run:
 
 ```bash
-python3 scripts/export_github_inventory.py --org taswater-core
-python3 scripts/export_github_inventory.py --org taswater-digital
+python3 scripts/export_github_inventory.py --org taswater
+python3 scripts/generate_imports.py --org taswater
 ```
 
-This writes `inventory/taswater-core.inventory.json` and `inventory/taswater-digital.inventory.json`.
+`export_github_inventory.py` streams timestamped `[team i/N]` and `[repo i/N]` progress lines to `stderr` so you can monitor long exports in real time (pass `--quiet` to suppress progress output). This writes `inventory/taswater.inventory.json` and updates `environments/taswater/imports.tf`.
 
 ### 2. Generate Candidate YAML Files & Drift Reports
 

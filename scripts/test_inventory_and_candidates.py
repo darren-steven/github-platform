@@ -11,6 +11,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 import generate_config_candidates as gen  # noqa: E402
 import export_github_inventory as exp  # noqa: E402
 import generate_imports as gen_imports  # noqa: E402
+import validate_agent_guardrails as val_guardrails  # noqa: E402
 import validate_config as val  # noqa: E402
 import urllib.error  # noqa: E402
 
@@ -350,6 +351,7 @@ def main():
     test_exporter_handles_400_on_external_groups()
     test_jira_autolink_config_validation()
     test_jira_autolink_import_blocks()
+    test_case_collision_and_progress_logging()
 
     print(
         "  PASS: Inventory schema, domain deduction (team + repo prefix), schema-valid candidate generation, and drift detection verified."
@@ -411,11 +413,16 @@ def test_exporter_handles_400_on_external_groups():
                 ]
             return []
 
-    snap = exp.export_organization_inventory(MockClient(), "TasWater")
+    progress_messages = []
+    snap = exp.export_organization_inventory(
+        MockClient(), "TasWater", progress_callback=progress_messages.append
+    )
     assert snap["organization"]["slug"] == "taswater", f"Expected lowercase slug 'taswater', got {snap['organization']['slug']}"
     assert snap["teams"][0]["slug"] == "platform-admins"
     assert snap["repositories"][0]["topics"] == ["iac"]
     assert snap["repositories"][0]["autolinks"][0]["key_prefix"] == "PPLCTNS-"
+    assert any("[team 1/1] platform-admins" in m for m in progress_messages), progress_messages
+    assert any("[repo 1/1] platform-github" in m for m in progress_messages), progress_messages
 
 
 def test_jira_autolink_import_blocks():
@@ -462,6 +469,32 @@ def test_jira_autolink_config_validation():
     val.validate_against_schema(domain_doc, domain_schema, "jira_invalid_key")
     assert val.errors, "Expected a lowercase Jira project key to fail schema validation"
     val.errors.clear()
+
+
+def test_case_collision_and_progress_logging():
+    """Verify Windows/macOS case collisions ('taswater' vs 'TasWater') and uppercase slugs are rejected."""
+    collisions = val_guardrails.find_case_and_slug_violations(
+        [
+            "candidates/taswater/org.yaml",
+            "candidates/TasWater/drift-report.md",
+        ]
+    )
+    assert any("[PATH-CASE-COLLISION]" in c for c in collisions), f"Expected collision error, got {collisions}"
+    assert any("[PATH-UPPERCASE-SLUG]" in c for c in collisions), f"Expected uppercase slug error, got {collisions}"
+
+    upper_inv = val_guardrails.find_case_and_slug_violations(["inventory/TasWater.inventory.json"])
+    assert any("[PATH-UPPERCASE-SLUG]" in c for c in upper_inv), f"Expected uppercase inventory error, got {upper_inv}"
+
+    clean = val_guardrails.find_case_and_slug_violations(
+        [
+            "config/orgs/taswater/README.md",
+            "config/orgs/taswater/org.yaml",
+            "candidates/taswater/org.yaml",
+            "environments/taswater/README.md",
+            "inventory/taswater.inventory.json",
+        ]
+    )
+    assert not clean, f"Expected clean paths to pass, got {clean}"
 
 
 if __name__ == "__main__":

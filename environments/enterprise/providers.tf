@@ -5,5 +5,5 @@
 # =============================================================================
 
 provider "github" {
-  owner = module.enterprise_baseline.enterprise.slug
+  owner = module.enterprise_baseline.enterprise_slug
 }

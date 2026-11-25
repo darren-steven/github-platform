@@ -106,29 +106,28 @@ locals {
 
         codeowners_teams = try(repo.codeowners_teams, [])
 
-        domain_environments = [
-          for env in domain_doc.defaults.environments : {
-            name                     = env.name
-            description              = try(env.description, "")
-            require_approval         = env.require_approval
-            approver_teams           = try(env.approver_teams, [])
-            deployment_branch_policy = try(env.deployment_branch_policy, "protected_branches")
-          }
-        ]
         # Deployment environments: Repo-level list replaces domain defaults when specified
-        environments = [
-         for env in (
-          try(repo.environments, null) != null
-            ? tolist(repo.environments)
-            : tolist(try(domain_environments, []))
-          ) : {
-            name                     = env.name
-            description              = try(env.description, "")
-            require_approval         = env.require_approval
-            approver_teams           = try(env.approver_teams, [])
-            deployment_branch_policy = try(env.deployment_branch_policy, "protected_branches")
-          }
-        ]
+        environments = concat(
+          [
+            for env in try(repo.environments, []) : {
+              name                     = tostring(env.name)
+              description              = try(tostring(env.description), "")
+              require_approval         = tobool(env.require_approval)
+              approver_teams           = [for team in try(env.approver_teams, []) : tostring(team)]
+              deployment_branch_policy = try(tostring(env.deployment_branch_policy), "protected_branches")
+            }
+          ],
+          [
+            for env in try(domain_doc.defaults.environments, []) : {
+              name                     = tostring(env.name)
+              description              = try(tostring(env.description), "")
+              require_approval         = tobool(env.require_approval)
+              approver_teams           = [for team in try(env.approver_teams, []) : tostring(team)]
+              deployment_branch_policy = try(tostring(env.deployment_branch_policy), "protected_branches")
+            }
+            if try(repo.environments, null) == null
+          ]
+        )
 
         # Non-sensitive GitHub Actions variables
         environment_variables = try(repo.environment_variables, {})
